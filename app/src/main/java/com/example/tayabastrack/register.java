@@ -40,6 +40,7 @@ public class register extends AppCompatActivity {
     private ImageView profileImageView;
     private ImageButton backButton; // ✅ Add this
 //change 1
+//change 2
     private static final int PICK_IMAGE_REQUEST = 100;
     private static final int CAMERA_REQUEST = 101;
     private static final int CAMERA_PERMISSION_CODE = 102;
