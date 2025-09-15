@@ -1,0 +1,73 @@
+<resources>
+    <string name="app_name">TayabaStrack</string>
+    <string name="register_here"><u>Register here.</u></string>
+    <string-array name="tayabas_barangays">
+        <item>Alitao</item>
+        <item>Alupay</item>
+        <item>Angustias</item>
+        <item>Ayahitan</item>
+        <item>Baguio</item>
+        <item>Banilad</item>
+        <item>Banilad Ibaba</item>
+        <item>Banilad Ilaya</item>
+        <item>Bantilan</item>
+        <item>Calantas</item>
+        <item>Calumpang</item>
+        <item>Camaysa</item>
+        <item>Dapdap</item>
+        <item>Dompol</item>
+        <item>Ipilan</item>
+        <item>Isabang</item>
+        <item>Katigan Kanluran</item>
+        <item>Katigan Silangan</item>
+        <item>Kanlurang Domoit</item>
+        <item>Kipot</item>
+        <item>Lapidario</item>
+        <item>Lawigue</item>
+        <item>Lita</item>
+        <item>Masin Norte</item>
+        <item>Masin Sur</item>
+        <item>Mate</item>
+        <item>Mayowe</item>
+        <item>Opias</item>
+        <item>Pandakaki</item>
+        <item>Pook</item>
+        <item>Potol</item>
+        <item>San Diego</item>
+        <item>San Isidro</item>
+        <item>San Roque</item>
+        <item>San Diego Zone I</item>
+        <item>San Diego Zone II</item>
+        <item>San Diego Zone III</item>
+        <item>San Diego Zone IV</item>
+        <item>San Isidro Zone I</item>
+        <item>San Isidro Zone II</item>
+        <item>San Isidro Zone III</item>
+        <item>San Roque Zone I</item>
+        <item>San Roque Zone II</item>
+        <item>San Roque Zone III</item>
+        <item>San Roque Zone IV</item>
+        <item>San Roque Zone V</item>
+        <item>San Roque Zone VI</item>
+        <item>San Roque Zone VII</item>
+        <item>San Roque Zone VIII</item>
+        <item>San Roque Zone IX</item>
+        <item>San Roque Zone X</item>
+        <item>San Roque Zone XI</item>
+        <item>San Roque Zone XII</item>
+        <item>San Roque Zone XIII</item>
+        <item>San Roque Zone XIV</item>
+        <item>San Roque Zone XV</item>
+        <item>San Roque Zone XVI</item>
+        <item>San Roque Zone XVII</item>
+        <item>San Roque Zone XVIII</item>
+        <item>San Roque Zone XIX</item>
+        <item>San Roque Zone XX</item>
+        <item>Santo Niño</item>
+        <item>Silanganin</item>
+        <item>Tagbakin</item>
+        <item>Tamisian</item>
+        <item>Wakas</item>
+    </string-array>
+
+</resources>
