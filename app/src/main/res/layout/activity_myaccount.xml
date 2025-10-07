@@ -5,6 +5,150 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@android:color/white"
     tools:context=".myaccount">
+
+    <!-- Header with logo + app name -->
+    <LinearLayout
+        android:id="@+id/headerLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="#004AAD"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:gravity="center_vertical"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- Back Button -->
+        <ImageButton
+            android:id="@+id/backButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/baseline_arrow_back_24"
+            android:contentDescription="Back"
+            android:tint="@android:color/white" />
+
+        <!-- Logo -->
+        <ImageView
+            android:id="@+id/logoImage"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginStart="16dp"
+            android:scaleType="centerCrop"
+            android:background="@drawable/tayabastracklogo"
+            android:padding="8dp" />
+
+        <!-- App Name -->
+        <TextView
+            android:id="@+id/appName"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:paddingStart="12dp"
+            android:text="MY ACCOUNT"
+            android:textColor="@android:color/white"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- Profile Section -->
+    <LinearLayout
+        android:id="@+id/profileSection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="32dp"
+        app:layout_constraintTop_toBottomOf="@id/headerLayout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- Profile Icon -->
+        <ImageView
+            android:id="@+id/profileIcon"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:src="@drawable/icon"
+            android:padding="8dp"
+            android:scaleType="centerCrop" />
+
+        <!-- Full Name -->
+        <TextView
+            android:id="@+id/fullNameText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Full name"
+            android:textColor="@android:color/black"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"
+            android:gravity="center" />
+
+        <!-- Position -->
+        <TextView
+            android:id="@+id/positionText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Position"
+            android:textColor="#666666"
+            android:textSize="16sp"
+            android:layout_marginTop="4dp"
+            android:gravity="center" />
+    </LinearLayout>
+
+    <!-- Buttons Section -->
+    <LinearLayout
+        android:id="@+id/buttonsSection"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp"
+        app:layout_constraintTop_toBottomOf="@id/profileSection"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="0.9">
+
+        <!-- Edit Profile Button -->
+        <Button
+            android:id="@+id/btnEditProfile"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="Edit profile"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:backgroundTint="#004AAD"
+            android:drawableTint="@android:color/white"
+            android:paddingStart="24dp" />
+
+        <!-- Delete Account Button -->
+        <Button
+            android:id="@+id/btnDeleteAccount"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="Delete Account"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:backgroundTint="#004AAD"
+            android:drawableTint="@android:color/white"
+            android:paddingStart="24dp" />
+
+        <!-- Log out Button -->
+        <Button
+            android:id="@+id/btnLogout"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="Log out"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:backgroundTint="#004AAD"
+            android:drawableTint="@android:color/white"
+            android:paddingStart="24dp" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

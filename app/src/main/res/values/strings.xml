@@ -69,5 +69,28 @@
         <item>Tamisian</item>
         <item>Wakas</item>
     </string-array>
+    <string-array name="barangay_positions">
+        <item>Select Position</item>
+        <item>Barangay Captain</item>
+        <item>Barangay Kagawad</item>
+        <item>Barangay Secretary</item>
+        <item>Barangay Treasurer</item>
+        <item>SK Chairperson</item>
+        <item>SK Kagawad</item>
+        <item>Barangay Health Worker</item>
+        <item>Barangay Tanod</item>
+        <item>Barangay Nutrition Scholar</item>
+        <item>Day Care Worker</item>
+        <item>Other</item>
+    </string-array>
 
+    <string-array name="name_suffixes">
+        <item>None</item>
+        <item>Jr.</item>
+        <item>Sr.</item>
+        <item>II</item>
+        <item>III</item>
+        <item>IV</item>
+        <item>V</item>
+    </string-array>
 </resources>

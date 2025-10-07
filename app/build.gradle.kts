@@ -1,15 +1,16 @@
 plugins {
-    alias(libs.plugins.android.application)
+    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.googleGms)
 }
 
 android {
     namespace = "com.example.tayabastrack"
-    compileSdk = 35
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.example.tayabastrack"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
@@ -32,12 +33,28 @@ android {
 }
 
 dependencies {
-
     implementation(libs.appcompat)
     implementation(libs.material)
-    implementation(libs.activity)
+    implementation(libs.activityKtx)
     implementation(libs.constraintlayout)
+
+    // Firebase BOM
+    implementation(platform(libs.firebaseBom))
+
+    // Firebase libraries
+    implementation(libs.firebaseAuthKtx)
+    implementation(libs.firebaseFirestoreKtx)
+    implementation(libs.firebaseStorageKtx)
+
+    // Google Maps API - Kotlin DSL syntax
+    implementation(libs.playServicesMaps)
+    implementation(libs.playServicesLocation)
+
+    // Optional: Google Places API (for location search, autocomplete, etc.)
+    implementation(libs.places)
+
+    // Testing
     testImplementation(libs.junit)
-    androidTestImplementation(libs.ext.junit)
-    androidTestImplementation(libs.espresso.core)
+    androidTestImplementation(libs.androidxJunit)
+    androidTestImplementation(libs.espressoCore)
 }

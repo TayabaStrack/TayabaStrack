@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.example.tayabastrack" />
+                  <option name="mobileSdkAppId" value="1:674055915366:android:ff671c1272452ea0eeaaa7" />
+                  <option name="projectId" value="tayabastrack-23b95" />
+                  <option name="projectNumber" value="674055915366" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

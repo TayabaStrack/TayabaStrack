@@ -1,22 +1,39 @@
 [versions]
-agp = "8.9.1"
+activityKtx = "1.9.2"
+agp = "8.5.2"
+androidxJunit = "1.2.1"
+appcompatVersion = "1.7.0"
+constraintlayoutVersion = "2.1.4"
+espressoCoreVersion = "3.6.1"
 junit = "4.13.2"
-junitVersion = "1.2.1"
-espressoCore = "3.6.1"
-appcompat = "1.7.1"
-material = "1.12.0"
-activity = "1.10.1"
-constraintlayout = "2.2.1"
+materialVersion = "1.12.0"
+googleGmsGoogleServices = "4.4.2"
+firebaseBom = "33.5.1"
+places = "4.4.1"
+playServicesLocation = "21.3.0"
+playServicesMaps = "19.2.0"
 
 [libraries]
-junit = { group = "junit", name = "junit", version.ref = "junit" }
-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+# AndroidX
+appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompatVersion" }
+material = { module = "com.google.android.material:material", version.ref = "materialVersion" }
+activityKtx = { module = "androidx.activity:activity-ktx", version.ref = "activityKtx" }
+constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayoutVersion" }
+
+# Firebase
+firebaseBom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebaseAuthKtx = { module = "com.google.firebase:firebase-auth-ktx" }
+firebaseFirestoreKtx = { module = "com.google.firebase:firebase-firestore-ktx" }
+firebaseStorageKtx = { module = "com.google.firebase:firebase-storage-ktx" }
+
+# Testing
+junit = { module = "junit:junit", version.ref = "junit" }
+androidxJunit = { module = "androidx.test.ext:junit", version.ref = "androidxJunit" }
+espressoCore = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCoreVersion" }
+places = { module = "com.google.android.libraries.places:places", version.ref = "places" }
+playServicesLocation = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
+playServicesMaps = { module = "com.google.android.gms:play-services-maps", version.ref = "playServicesMaps" }
 
 [plugins]
-android-application = { id = "com.android.application", version.ref = "agp" }
-
+androidApplication = { id = "com.android.application", version.ref = "agp" }
+googleGms = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }

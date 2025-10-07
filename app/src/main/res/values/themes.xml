@@ -4,6 +4,7 @@
     <style name="Base.Theme.TayabaStrack" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <item name="colorControlActivated">@color/blue</item>
+        <item name="android:windowSoftInputMode">adjustResize</item>
         <!-- You can also override other colors if needed -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
     </style>

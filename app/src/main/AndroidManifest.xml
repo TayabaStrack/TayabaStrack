@@ -1,10 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-    <!-- ✅ Add these permissions ABOVE the <application> -->
+
+    <!-- Existing permissions -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <!-- Google Maps API permissions -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
@@ -16,6 +23,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TayabaStrack"
         tools:targetApi="31">
+
+        <!-- Google Maps API Key - REPLACE "YOUR_API_KEY_HERE" with your actual API key -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyA-qQHTtts5LopCcW6hzFWBvcxhXszrhWs"/>
+
+        <!-- Your existing activities -->
         <activity
             android:name=".completed"
             android:exported="false" />
@@ -33,9 +47,11 @@
             android:exported="false" />
         <activity
             android:name=".submitreport"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
         <activity
             android:name=".register"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
         <activity
             android:name=".dashboard"
@@ -45,16 +61,17 @@
             android:exported="false" />
         <activity
             android:name=".Login"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
         <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
     </application>
 
 </manifest>
