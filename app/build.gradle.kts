@@ -52,6 +52,7 @@ dependencies {
 
     // Optional: Google Places API (for location search, autocomplete, etc.)
     implementation(libs.places)
+    implementation(libs.activity)
 
     // Testing
     testImplementation(libs.junit)

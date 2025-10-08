@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -16,13 +17,13 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class myaccount extends AppCompatActivity {
 
     private TextView fullNameText, positionText;
-    private Button btnEditProfile, btnDeleteAccount, btnLogout;
+    private EditText etFirstName, etMiddleName, etSurname, etPosition, etPhoneNumber, etBarangay;
+    private Button btnLogout;
     private ImageButton backButton;
 
     private FirebaseAuth mAuth;
@@ -68,8 +69,12 @@ public class myaccount extends AppCompatActivity {
     private void initializeViews() {
         fullNameText = findViewById(R.id.fullNameText);
         positionText = findViewById(R.id.positionText);
-        btnEditProfile = findViewById(R.id.btnEditProfile);
-        btnDeleteAccount = findViewById(R.id.btnDeleteAccount);
+        etFirstName = findViewById(R.id.etFirstName);
+        etMiddleName = findViewById(R.id.etMiddleName);
+        etSurname = findViewById(R.id.etSurname);
+        etPosition = findViewById(R.id.etPosition);
+        etPhoneNumber = findViewById(R.id.etPhoneNumber);
+        etBarangay = findViewById(R.id.etBarangay);
         btnLogout = findViewById(R.id.btnLogout);
         backButton = findViewById(R.id.backButton);
     }
@@ -86,14 +91,29 @@ public class myaccount extends AppCompatActivity {
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
                         // Get user data
-                        String fullName = documentSnapshot.getString("fullName");
+                        String firstName = documentSnapshot.getString("firstName");
+                        String middleName = documentSnapshot.getString("middleName");
+                        String surname = documentSnapshot.getString("surname");
                         String position = documentSnapshot.getString("position");
+                        String phoneNumber = documentSnapshot.getString("phoneNumber");
+                        String barangay = documentSnapshot.getString("barangay");
+                        String fullName = documentSnapshot.getString("fullName");
 
-                        // Update UI
+                        // Update EditTexts
+                        if (firstName != null) etFirstName.setText(firstName);
+                        if (middleName != null) etMiddleName.setText(middleName);
+                        if (surname != null) etSurname.setText(surname);
+                        if (position != null) etPosition.setText(position);
+                        if (phoneNumber != null) etPhoneNumber.setText(phoneNumber);
+                        if (barangay != null) etBarangay.setText(barangay);
+
+                        // Update header display
                         if (fullName != null && !fullName.isEmpty()) {
                             fullNameText.setText(fullName);
                         } else {
-                            fullNameText.setText("No name available");
+                            // Build full name from components
+                            String displayName = buildFullName(firstName, middleName, surname);
+                            fullNameText.setText(displayName.isEmpty() ? "No name available" : displayName);
                         }
 
                         if (position != null && !position.isEmpty()) {
@@ -118,6 +138,22 @@ public class myaccount extends AppCompatActivity {
                 });
     }
 
+    private String buildFullName(String firstName, String middleName, String surname) {
+        StringBuilder name = new StringBuilder();
+        if (firstName != null && !firstName.isEmpty()) {
+            name.append(firstName);
+        }
+        if (middleName != null && !middleName.isEmpty()) {
+            if (name.length() > 0) name.append(" ");
+            name.append(middleName);
+        }
+        if (surname != null && !surname.isEmpty()) {
+            if (name.length() > 0) name.append(" ");
+            name.append(surname);
+        }
+        return name.toString();
+    }
+
     private void setupEventListeners() {
         // Back button
         backButton.setOnClickListener(v -> {
@@ -125,94 +161,8 @@ public class myaccount extends AppCompatActivity {
             finish();
         });
 
-        // Edit Profile button
-        btnEditProfile.setOnClickListener(v -> {
-            // TODO: Navigate to Edit Profile activity
-            Toast.makeText(this, "Edit Profile - Coming Soon", Toast.LENGTH_SHORT).show();
-            // Intent intent = new Intent(myaccount.this, EditProfileActivity.class);
-            // startActivity(intent);
-        });
-
-        // Delete Account button
-        btnDeleteAccount.setOnClickListener(v -> showDeleteAccountDialog());
-
         // Logout button
         btnLogout.setOnClickListener(v -> showLogoutDialog());
-    }
-
-    private void showDeleteAccountDialog() {
-        new AlertDialog.Builder(this)
-                .setTitle("Delete Account")
-                .setMessage("Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently deleted.")
-                .setPositiveButton("Delete", (dialog, which) -> deleteAccount())
-                .setNegativeButton("Cancel", null)
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .show();
-    }
-
-    private void deleteAccount() {
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser == null) {
-            Toast.makeText(this, "No user logged in", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // Show progress dialog
-        AlertDialog progressDialog = new AlertDialog.Builder(this)
-                .setMessage("Deleting account...")
-                .setCancelable(false)
-                .create();
-        progressDialog.show();
-
-        // Delete user data from Firestore first
-        db.collection("users")
-                .document(userId)
-                .delete()
-                .addOnSuccessListener(aVoid -> {
-                    Log.d("MyAccount", "User document deleted from Firestore");
-
-                    // Delete all user reports
-                    db.collection("users")
-                            .document(userId)
-                            .collection("reports")
-                            .get()
-                            .addOnSuccessListener(queryDocumentSnapshots -> {
-                                for (DocumentSnapshot document : queryDocumentSnapshots.getDocuments()) {
-                                    document.getReference().delete();
-                                }
-                                Log.d("MyAccount", "User reports deleted");
-
-                                // Finally, delete the Firebase Auth account
-                                currentUser.delete()
-                                        .addOnCompleteListener(task -> {
-                                            progressDialog.dismiss();
-                                            if (task.isSuccessful()) {
-                                                Toast.makeText(this, "Account deleted successfully",
-                                                        Toast.LENGTH_SHORT).show();
-                                                // Redirect to login
-                                                startActivity(new Intent(myaccount.this, Login.class));
-                                                finish();
-                                            } else {
-                                                Toast.makeText(this, "Failed to delete account: " +
-                                                                task.getException().getMessage(),
-                                                        Toast.LENGTH_SHORT).show();
-                                                Log.e("MyAccount", "Error deleting auth account", task.getException());
-                                            }
-                                        });
-                            })
-                            .addOnFailureListener(e -> {
-                                progressDialog.dismiss();
-                                Toast.makeText(this, "Failed to delete user reports: " + e.getMessage(),
-                                        Toast.LENGTH_SHORT).show();
-                                Log.e("MyAccount", "Error deleting reports", e);
-                            });
-                })
-                .addOnFailureListener(e -> {
-                    progressDialog.dismiss();
-                    Toast.makeText(this, "Failed to delete user data: " + e.getMessage(),
-                            Toast.LENGTH_SHORT).show();
-                    Log.e("MyAccount", "Error deleting user document", e);
-                });
     }
 
     private void showLogoutDialog() {

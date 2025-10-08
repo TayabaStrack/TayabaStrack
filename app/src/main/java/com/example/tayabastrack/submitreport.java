@@ -754,40 +754,68 @@ public class submitreport extends AppCompatActivity implements OnMapReadyCallbac
         FirebaseUser currentUser = mAuth.getCurrentUser();
         String userId = currentUser != null ? currentUser.getUid() : "anonymous";
 
-        // Generate unique report ID
-        String reportId = UUID.randomUUID().toString();
+        // Fetch user data from Firestore first
+        db.collection("users")
+                .document(userId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    // Get user information
+                    String firstName = documentSnapshot.getString("firstName");
+                    String lastName = documentSnapshot.getString("lastName");
+                    String userEmail = documentSnapshot.getString("email");
+                    String userContact = documentSnapshot.getString("contact");
+                    String userBarangay = documentSnapshot.getString("barangay");
+                    String position = documentSnapshot.getString("position");
 
-        // Get current timestamp
-        String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
+                    // Generate unique report ID
+                    String reportId = UUID.randomUUID().toString();
 
-        // Get location coordinates
-        LatLng location = getSelectedLocation();
+                    // Get current timestamp
+                    String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
 
-        // Create report data map
-        Map<String, Object> reportData = new HashMap<>();
-        reportData.put("reportId", reportId);
-        reportData.put("userId", userId);
-        reportData.put("description", desc);
-        reportData.put("width", Double.parseDouble(widthStr));
-        reportData.put("height", Double.parseDouble(heightStr));
-        reportData.put("peopleInvolved", Integer.parseInt(involvedStr));
-        reportData.put("affectedAgeGroups", ageGroups);
-        reportData.put("barangay", spinnerBarangay.getSelectedItem().toString());
-        reportData.put("latitude", location.latitude);
-        reportData.put("longitude", location.longitude);
-        reportData.put("timestamp", timestamp);
-        reportData.put("status", "pending");
-        reportData.put("createdAt", new Date());
+                    // Get location coordinates
+                    LatLng location = getSelectedLocation();
 
-        // Add image as Blob if available
-        if (imageBytes != null) {
-            Blob imageBlob = Blob.fromBytes(imageBytes);
-            reportData.put("incidentImage", imageBlob);
-            Log.d("SubmitReport", "Image added as Blob, size: " + imageBytes.length + " bytes");
-        }
+                    // Create report data map
+                    Map<String, Object> reportData = new HashMap<>();
+                    reportData.put("reportId", reportId);
+                    reportData.put("userId", userId);
 
-        // Save report to Firestore
-        saveReportToFirestore(reportData);
+                    // Add user information to report
+                    if (firstName != null) reportData.put("firstName", firstName);
+                    if (lastName != null) reportData.put("lastName", lastName);
+                    if (userEmail != null) reportData.put("email", userEmail);
+                    if (userContact != null) reportData.put("contact", userContact);
+                    if (userBarangay != null) reportData.put("userBarangay", userBarangay);
+                    if (position != null) reportData.put("position", position);
+
+                    reportData.put("description", desc);
+                    reportData.put("width", Double.parseDouble(widthStr));
+                    reportData.put("height", Double.parseDouble(heightStr));
+                    reportData.put("peopleInvolved", Integer.parseInt(involvedStr));
+                    reportData.put("affectedAgeGroups", ageGroups);
+                    reportData.put("barangay", spinnerBarangay.getSelectedItem().toString());
+                    reportData.put("latitude", location.latitude);
+                    reportData.put("longitude", location.longitude);
+                    reportData.put("timestamp", timestamp);
+                    reportData.put("status", "pending");
+                    reportData.put("createdAt", new Date());
+
+                    // Add image as Blob if available
+                    if (imageBytes != null) {
+                        Blob imageBlob = Blob.fromBytes(imageBytes);
+                        reportData.put("incidentImage", imageBlob);
+                        Log.d("SubmitReport", "Image added as Blob, size: " + imageBytes.length + " bytes");
+                    }
+
+                    // Save report to Firestore
+                    saveReportToFirestore(reportData);
+                })
+                .addOnFailureListener(e -> {
+                    progressDialog.dismiss();
+                    Log.e("SubmitReport", "Failed to fetch user data", e);
+                    Toast.makeText(this, "Failed to fetch user information", Toast.LENGTH_SHORT).show();
+                });
     }
 
     private void saveReportToFirestore(Map<String, Object> reportData) {
