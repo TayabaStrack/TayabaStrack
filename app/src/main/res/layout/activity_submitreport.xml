@@ -93,32 +93,32 @@
                     android:textCursorDrawable="@null" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Upload Image - REQUIRED -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Upload Image *"
-                android:textStyle="bold"
-                android:textColor="@android:color/black"
-                android:layout_marginBottom="8dp" />
-
-            <Button
+            <!-- Upload Image - REQUIRED (FrameLayout Style) -->
+            <FrameLayout
                 android:id="@+id/btnUpload"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Upload Image / Take Photo"
-                android:textColor="@android:color/white"
-                android:backgroundTint="#004aad"
-                android:layout_marginBottom="8dp" />
-
-            <ImageView
-                android:id="@+id/previewImage"
-                android:layout_width="match_parent"
                 android:layout_height="200dp"
-                android:scaleType="centerCrop"
-                android:adjustViewBounds="true"
-                android:visibility="gone"
-                android:background="@android:color/darker_gray" />
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/blue_border_background"
+                android:clickable="true"
+                android:focusable="true">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/uploadincident"
+                    android:scaleType="fitCenter"
+                    android:layout_margin="8dp"
+                    android:adjustViewBounds="true" />
+
+                <ImageView
+                    android:id="@+id/previewImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="8dp"
+                    android:scaleType="centerCrop"
+                    android:visibility="gone" />
+            </FrameLayout>
 
             <!-- Measurements - REQUIRED -->
             <com.google.android.material.textfield.TextInputLayout
@@ -239,7 +239,7 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp" />
 
-            <!-- Map Container with Border - INCREASED HEIGHT -->
+            <!-- Map Container with Border -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/mapContainer"
                 android:layout_width="match_parent"
@@ -315,19 +315,30 @@
                 android:layout_height="wrap_content"
                 android:text="Barangay: *"
                 android:textStyle="bold"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
                 android:textColor="#000"/>
 
-            <Spinner
-                android:id="@+id/spinnerBarangay"
+            <FrameLayout
+                android:id="@+id/barangayContainer"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:spinnerMode="dropdown"
-                android:entries="@array/tayabas_barangays"
-                android:backgroundTint="#004aad"
-                android:padding="12dp"
-                android:popupBackground="@android:color/white"
-                android:theme="@android:style/ThemeOverlay.Material.Light" />
+                android:layout_height="56dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/blue_border_background"
+                android:clickable="true"
+                android:focusable="true">
+
+                <Spinner
+                    android:id="@+id/spinnerBarangay"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:spinnerMode="dropdown"
+                    android:entries="@array/tayabas_barangays"
+                    android:padding="12dp"
+                    android:popupBackground="@color/white"
+                    android:theme="@android:style/ThemeOverlay.Material.Light"
+                    android:background="@android:color/transparent" />
+            </FrameLayout>
 
             <!-- Submit -->
             <Button

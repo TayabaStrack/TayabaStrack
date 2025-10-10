@@ -71,11 +71,11 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Firstname -->
+            <!-- First Name -->
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="12dp"
                 android:hint="First Name"
                 app:boxStrokeColor="#004aad"
                 app:boxStrokeWidth="2dp"
@@ -96,7 +96,7 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="1dp"
+                android:layout_marginBottom="4dp"
                 android:hint="Middle Name"
                 app:boxStrokeColor="#004aad"
                 app:boxStrokeWidth="2dp"
@@ -119,128 +119,152 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="I don't have a middle name"
-                android:layout_marginTop="8dp"
+                android:layout_marginBottom="12dp"
                 android:buttonTint="#004aad"
-                android:textColor="@android:color/black" />
+                android:textColor="@android:color/black"
+                android:textSize="13sp" />
 
-            <!-- Surname -->
-            <com.google.android.material.textfield.TextInputLayout
+            <!-- Surname and Suffix Row -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:hint="Surname"
-                app:boxStrokeColor="#004aad"
-                app:boxStrokeWidth="2dp"
-                app:boxStrokeWidthFocused="3dp"
-                app:hintTextColor="@color/blue_004aad">
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp"
+                android:weightSum="2">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/sname"
-                    android:layout_width="match_parent"
+                <!-- Surname -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:inputType="textPersonName"
-                    android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ "
-                    android:textColor="@android:color/black"
-                    android:textCursorDrawable="@null" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:layout_weight="1.2"
+                    android:layout_marginEnd="8dp"
+                    android:hint="Surname"
+                    app:boxStrokeColor="#004aad"
+                    app:boxStrokeWidth="2dp"
+                    app:boxStrokeWidthFocused="3dp"
+                    app:hintTextColor="@color/blue_004aad">
 
-            <!-- Suffix Dropdown -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Suffix (Optional):"
-                android:textStyle="bold"
-                android:layout_marginTop="16dp"
-                android:textColor="#000"/>
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/sname"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textPersonName"
+                        android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ "
+                        android:textColor="@android:color/black"
+                        android:textCursorDrawable="@null" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-            <Spinner
-                android:id="@+id/spinnerSuffix"
+                <!-- Suffix Dropdown -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.8"
+                    android:hint="Suffix"
+                    app:boxStrokeColor="#004aad"
+                    app:boxStrokeWidth="2dp"
+                    app:boxStrokeWidthFocused="3dp"
+                    app:hintTextColor="@color/blue_004aad"
+                    app:endIconTint="#004aad"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/spinnerSuffix"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        android:textColor="@android:color/black"
+                        android:popupBackground="#004aad"
+                        android:textCursorDrawable="@null"/>
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+
+            <!-- Barangay and Position Row -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:spinnerMode="dropdown"
-                android:entries="@array/name_suffixes"
-                android:backgroundTint="#004aad"
-                android:padding="12dp"
-                android:layout_marginBottom="0dp"
-                android:popupBackground="@android:color/white"
-                android:dropDownWidth="match_parent"
-                android:dropDownHorizontalOffset="0dp"
-                android:dropDownVerticalOffset="0dp"
-                android:theme="@android:style/ThemeOverlay.Material.Light" />
-
-            <!-- Barangay Dropdown -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Barangay:"
-                android:textStyle="bold"
-                android:layout_marginTop="16dp"
-                android:textColor="#000"/>
-
-            <Spinner
-                android:id="@+id/spinnerBarangay"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:spinnerMode="dropdown"
-                android:entries="@array/tayabas_barangays"
-                android:backgroundTint="#004aad"
-                android:padding="12dp"
-                android:popupBackground="@android:color/white"
-                android:dropDownWidth="match_parent"
-                android:dropDownHorizontalOffset="0dp"
-                android:dropDownVerticalOffset="0dp"
-                android:theme="@android:style/ThemeOverlay.Material.Light" />
-
-            <!-- Position Dropdown -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Position:"
-                android:textStyle="bold"
-                android:layout_marginTop="16dp"
-                android:textColor="#000"/>
-
-            <Spinner
-                android:id="@+id/spinnerPosition"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:spinnerMode="dropdown"
-                android:entries="@array/barangay_positions"
-                android:backgroundTint="#004aad"
-                android:padding="12dp"
+                android:orientation="horizontal"
                 android:layout_marginBottom="16dp"
-                android:popupBackground="@android:color/white"
-                android:dropDownWidth="match_parent"
-                android:dropDownHorizontalOffset="0dp"
-                android:dropDownVerticalOffset="0dp"
-                android:theme="@android:style/ThemeOverlay.Material.Light" />
+                android:weightSum="2">
 
-            <!-- Upload Profile Image -->
-            <Button
+                <!-- Barangay Dropdown -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    android:hint="Barangay"
+                    app:boxStrokeColor="#004aad"
+                    app:boxStrokeWidth="2dp"
+                    app:boxStrokeWidthFocused="3dp"
+                    app:hintTextColor="@color/blue_004aad"
+                    app:endIconTint="#004aad"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/spinnerBarangay"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        android:textColor="@android:color/black"
+                        android:popupBackground="#004aad"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Position Dropdown -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="Position"
+                    app:boxStrokeColor="#004aad"
+                    app:boxStrokeWidth="2dp"
+                    app:boxStrokeWidthFocused="3dp"
+                    app:hintTextColor="@color/blue_004aad"
+                    app:endIconTint="#004aad"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/spinnerPosition"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        android:textColor="@android:color/black"
+                        android:popupBackground="#004aad"/>
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+
+            <!-- Upload ID Card with blue border -->
+            <FrameLayout
                 android:id="@+id/UploadID"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Take/Upload Valid ID"
-                android:textColor="@android:color/white"
-                android:backgroundTint="#004aad"
-                android:layout_marginTop="16dp" />
-
-            <ImageView
-                android:id="@+id/ID"
-                android:layout_width="match_parent"
                 android:layout_height="200dp"
-                android:scaleType="centerCrop"
-                android:adjustViewBounds="true"
-                android:visibility="gone"
-                android:background="@android:color/darker_gray" />
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/blue_border_background"
+                android:clickable="true"
+                android:focusable="true">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/uploadid"
+                    android:scaleType="fitCenter"
+                    android:layout_margin="8dp"
+                    android:adjustViewBounds="true" />
+
+                <ImageView
+                    android:id="@+id/ID"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="8dp"
+                    android:scaleType="centerCrop"
+                    android:visibility="gone" />
+            </FrameLayout>
 
             <!-- Contact Number -->
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:layout_marginTop="16dp"
-                android:hint="Contact Number"
+                android:layout_marginBottom="12dp"
+                android:hint="Contact Number (9XXXXXXXXX)"
                 app:boxStrokeColor="#004aad"
                 app:boxStrokeWidth="2dp"
                 app:boxStrokeWidthFocused="3dp"
@@ -263,7 +287,7 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="12dp"
                 android:hint="Email"
                 app:boxStrokeColor="#004aad"
                 app:boxStrokeWidth="2dp"
@@ -283,7 +307,7 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
+                android:layout_marginBottom="12dp"
                 android:hint="Password"
                 app:boxStrokeColor="#004aad"
                 app:boxStrokeWidth="2dp"
@@ -303,7 +327,7 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="1dp"
+                android:layout_marginBottom="12dp"
                 android:hint="Confirm Password"
                 app:boxStrokeColor="#004aad"
                 app:boxStrokeWidth="2dp"
@@ -324,10 +348,12 @@
                 android:id="@+id/termsCheckBox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="16dp"
                 android:buttonTint="#004aad"
                 android:text="I agree to the Terms and Conditions"
-                android:textColor="@android:color/black" />
+                android:textColor="@android:color/black"
+                android:textSize="13sp" />
 
             <!-- Register Button -->
             <Button
@@ -337,7 +363,8 @@
                 android:text="Register"
                 android:textColor="@android:color/white"
                 android:backgroundTint="#004aad"
-                android:layout_marginTop="24dp" />
+                android:textStyle="bold"
+                android:paddingVertical="14dp" />
 
         </LinearLayout>
     </ScrollView>

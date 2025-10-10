@@ -22,7 +22,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Blob;
 
-public class completed extends AppCompatActivity {
+public class declined extends AppCompatActivity {
 
     private LinearLayout contentLayout;
     private FirebaseFirestore db;
@@ -32,8 +32,7 @@ public class completed extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_completed);
-
+        setContentView(R.layout.activity_declined);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -50,28 +49,28 @@ public class completed extends AppCompatActivity {
         // Find the tab TextViews
         TextView pendingTab = findViewById(R.id.tabPending);
         TextView ongoingTab = findViewById(R.id.ongoing);
-        TextView declinedTab = findViewById(R.id.declined);
+        TextView completedTab = findViewById(R.id.completed);
 
-        // Load completed reports
-        loadCompletedReports();
+        // Load declined reports
+        loadDeclinedReports();
 
         // Click listener for PENDING
         pendingTab.setOnClickListener(v -> {
-            Intent intent = new Intent(completed.this, myreports.class);
+            Intent intent = new Intent(declined.this, myreports.class);
             startActivity(intent);
             finish();
         });
 
         // Click listener for ON-GOING
         ongoingTab.setOnClickListener(v -> {
-            Intent intent = new Intent(completed.this, ongoing.class);
+            Intent intent = new Intent(declined.this, ongoing.class);
             startActivity(intent);
             finish();
         });
 
-        // Click listener for DECLINED
-        declinedTab.setOnClickListener(v -> {
-            Intent intent = new Intent(completed.this, declined.class);
+        // Click listener for COMPLETED
+        completedTab.setOnClickListener(v -> {
+            Intent intent = new Intent(declined.this, completed.class);
             startActivity(intent);
             finish();
         });
@@ -79,13 +78,13 @@ public class completed extends AppCompatActivity {
         // Back Button
         ImageButton backButton = findViewById(R.id.backButton);
         backButton.setOnClickListener(v -> {
-            Intent intent = new Intent(completed.this, dashboard.class);
+            Intent intent = new Intent(declined.this, dashboard.class);
             startActivity(intent);
             finish();
         });
     }
 
-    private void loadCompletedReports() {
+    private void loadDeclinedReports() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
             Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show();
@@ -94,11 +93,11 @@ public class completed extends AppCompatActivity {
 
         String userId = currentUser.getUid();
 
-        // Fetch completed reports from Firestore
+        // Fetch declined reports from Firestore
         db.collection("users")
                 .document(userId)
                 .collection("reports")
-                .whereEqualTo("status", "completed")
+                .whereEqualTo("status", "declined")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     contentLayout.removeAllViews();
@@ -106,7 +105,7 @@ public class completed extends AppCompatActivity {
                     if (queryDocumentSnapshots.isEmpty()) {
                         // Show empty state message
                         TextView emptyMessage = new TextView(this);
-                        emptyMessage.setText("No completed reports");
+                        emptyMessage.setText("No declined reports");
                         emptyMessage.setTextSize(16);
                         emptyMessage.setPadding(16, 16, 16, 16);
                         emptyMessage.setGravity(android.view.Gravity.CENTER);
@@ -114,7 +113,7 @@ public class completed extends AppCompatActivity {
                         return;
                     }
 
-                    // Create report cards for each completed report
+                    // Create report cards for each declined report
                     queryDocumentSnapshots.getDocuments().forEach(document -> {
                         CardView reportCard = createReportCard(document.getData());
                         contentLayout.addView(reportCard);
@@ -146,7 +145,7 @@ public class completed extends AppCompatActivity {
         cardContent.setBackgroundColor(0xFFFFFFFF);
         cardView.addView(cardContent);
 
-        // Left side - All text information
+        // Left side - Text information
         LinearLayout leftContainer = new LinearLayout(this);
         leftContainer.setOrientation(LinearLayout.VERTICAL);
         LinearLayout.LayoutParams leftParams = new LinearLayout.LayoutParams(
@@ -167,19 +166,9 @@ public class completed extends AppCompatActivity {
                 reportData.get("barangay") != null ? reportData.get("barangay").toString() : "No barangay",
                 false);
 
-        // Inspection Section
-        addInfoSection(leftContainer, "Inspection:",
-                reportData.get("inspection") != null ? reportData.get("inspection").toString() : "N/A",
-                false);
-
-        // To Repair In Section
-        addInfoSection(leftContainer, "To Repair In:",
-                reportData.get("toRepairIn") != null ? reportData.get("toRepairIn").toString() : "N/A",
-                false);
-
-        // Repaired Section
-        addInfoSection(leftContainer, "Repaired:",
-                reportData.get("repaired") != null ? reportData.get("repaired").toString() : "N/A",
+        // Reason Section
+        addInfoSection(leftContainer, "Reason:",
+                reportData.get("reason") != null ? reportData.get("reason").toString() : "No reason provided",
                 false);
 
         // Right side - Image Section

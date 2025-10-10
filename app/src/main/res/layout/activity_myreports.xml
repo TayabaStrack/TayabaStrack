@@ -54,97 +54,142 @@
             android:textStyle="bold" />
     </LinearLayout>
 
-    <!-- Tab row -->
-    <LinearLayout
-        android:id="@+id/tabLayout"
+    <!-- Tab row (Not Scrollable) -->
+    <HorizontalScrollView
+        android:id="@+id/horizontalScrollView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        app:layout_constraintTop_toBottomOf="@id/headerLayout"
+        android:scrollbars="none"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/headerLayout">
 
-        <!-- Pending Tab -->
         <LinearLayout
+            android:id="@+id/tabLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:paddingHorizontal="16dp">
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp">
 
-            <TextView
-                android:id="@+id/tabPending"
+            <!-- Pending Tab -->
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="PENDING"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="#004AAD" />
+                android:gravity="center"
+                android:minWidth="100dp"
+                android:orientation="vertical"
+                android:paddingHorizontal="16dp">
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="4dp"
-                android:background="#004AAD" />
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/tabPending"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="PENDING"
+                    android:textColor="#004AAD"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
 
-        <!-- On-Going Tab -->
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:paddingHorizontal="16dp">
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="4dp"
+                    android:background="#004AAD" />
+            </LinearLayout>
 
-            <TextView
-                android:id="@+id/ongoing"
+            <!-- On-Going Tab -->
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="ON-GOING"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="#555555" />
+                android:gravity="center"
+                android:minWidth="100dp"
+                android:orientation="vertical"
+                android:paddingHorizontal="16dp">
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="4dp"
-                android:background="@android:color/transparent" />
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/ongoing"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ON-GOING"
+                    android:textColor="#555555"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
 
-        <!-- Completed Tab -->
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:paddingHorizontal="16dp">
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="4dp"
+                    android:background="@android:color/transparent" />
+            </LinearLayout>
 
-            <TextView
-                android:id="@+id/completed"
+            <!-- Completed Tab -->
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="COMPLETED"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="#555555" />
+                android:gravity="center"
+                android:minWidth="100dp"
+                android:orientation="vertical"
+                android:paddingHorizontal="16dp">
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="4dp"
-                android:background="@android:color/transparent" />
+                <TextView
+                    android:id="@+id/completed"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="COMPLETED"
+                    android:textColor="#555555"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="4dp"
+                    android:background="@android:color/transparent" />
+            </LinearLayout>
+
+            <!-- Declined Tab -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:minWidth="100dp"
+                android:orientation="vertical"
+                android:paddingHorizontal="16dp">
+
+                <TextView
+                    android:id="@+id/declined"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="DECLINED"
+                    android:textColor="#555555"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="4dp"
+                    android:background="@android:color/transparent" />
+            </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
+    </HorizontalScrollView>
 
-    <!-- Content area -->
-    <FrameLayout
-        android:id="@+id/contentFrame"
+    <!-- Content area with ScrollView -->
+    <ScrollView
+        android:id="@+id/contentScroll"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@android:color/white"
-        app:layout_constraintTop_toBottomOf="@id/tabLayout"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/horizontalScrollView">
+
+        <LinearLayout
+            android:id="@+id/contentFrame"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Report cards will be added dynamically here -->
+
+        </LinearLayout>
+    </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

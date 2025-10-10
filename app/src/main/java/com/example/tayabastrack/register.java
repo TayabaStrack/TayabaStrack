@@ -48,12 +48,13 @@ import java.util.Map;
 public class register extends AppCompatActivity {
 
     private CheckBox termsCheckBox, noMiddleNameCheckBox;
-    private Button registerButton, uploadImageButton;
+    private Button registerButton;
+    private FrameLayout uploadImageButton;
     private ImageView profileImageView;
     private ImageButton backButton;
     private TextInputEditText emailField, passwordField, confirmPasswordField;
     private TextInputEditText firstNameField, middleNameField, surnameField, contactNumberField;
-    private Spinner barangaySpinner, positionSpinner, suffixSpinner;
+    private AutoCompleteTextView barangaySpinner, positionSpinner, suffixSpinner;
     private FirebaseAuth auth;
     private FirebaseFirestore firestore;
 
@@ -86,6 +87,9 @@ public class register extends AppCompatActivity {
         // Initialize Views
         initializeViews();
 
+        // Setup dropdowns
+        setupDropdowns();
+
         // Setup event listeners
         setupEventListeners();
 
@@ -110,7 +114,7 @@ public class register extends AppCompatActivity {
         passwordField = findViewById(R.id.password);
         confirmPasswordField = findViewById(R.id.confirmpassword);
 
-        // Checkbox and spinners
+        // Checkbox and dropdowns (AutoCompleteTextView)
         noMiddleNameCheckBox = findViewById(R.id.no_mname);
         barangaySpinner = findViewById(R.id.spinnerBarangay);
         positionSpinner = findViewById(R.id.spinnerPosition);
@@ -122,6 +126,29 @@ public class register extends AppCompatActivity {
 
         // Add input filters for names (letters only)
         setupNameFilters();
+    }
+
+    private void setupDropdowns() {
+        // Suffix dropdown
+        String[] suffixes = getResources().getStringArray(R.array.name_suffixes);
+        ArrayAdapter<String> suffixAdapter = new ArrayAdapter<>(
+                this, android.R.layout.simple_dropdown_item_1line, suffixes);
+        suffixSpinner.setAdapter(suffixAdapter);
+        suffixSpinner.setText(suffixes[0], false); // Set default
+
+        // Barangay dropdown
+        String[] barangays = getResources().getStringArray(R.array.tayabas_barangays);
+        ArrayAdapter<String> barangayAdapter = new ArrayAdapter<>(
+                this, android.R.layout.simple_dropdown_item_1line, barangays);
+        barangaySpinner.setAdapter(barangayAdapter);
+        barangaySpinner.setText(barangays[0], false); // Set default
+
+        // Position dropdown
+        String[] positions = getResources().getStringArray(R.array.barangay_positions);
+        ArrayAdapter<String> positionAdapter = new ArrayAdapter<>(
+                this, android.R.layout.simple_dropdown_item_1line, positions);
+        positionSpinner.setAdapter(positionAdapter);
+        positionSpinner.setText(positions[0], false); // Set default
     }
 
     private void setupNameFilters() {
@@ -349,13 +376,13 @@ public class register extends AppCompatActivity {
         String firstName = firstNameField.getText().toString().trim();
         String middleName = middleNameField.getText().toString().trim();
         String surname = surnameField.getText().toString().trim();
-        String suffix = suffixSpinner.getSelectedItem().toString();
-        String position = positionSpinner.getSelectedItem().toString();
+        String suffix = suffixSpinner.getText().toString();
+        String position = positionSpinner.getText().toString();
         String contactNumber = contactNumberField.getText().toString().trim();
         String email = emailField.getText().toString().trim();
         String password = passwordField.getText().toString().trim();
         String confirmPassword = confirmPasswordField.getText().toString().trim();
-        String barangay = barangaySpinner.getSelectedItem().toString();
+        String barangay = barangaySpinner.getText().toString();
 
         // Validation
         if (firstName.isEmpty() || surname.isEmpty() ||
@@ -365,7 +392,7 @@ public class register extends AppCompatActivity {
         }
 
         // Check if position is selected
-        if (position.equals("Select Position")) {
+        if (position.equals("Select Position") || position.isEmpty()) {
             Toast.makeText(this, "Please select a position", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -417,7 +444,7 @@ public class register extends AppCompatActivity {
                                     " " + surname;
 
                             // Add suffix if not "None"
-                            if (!suffix.equals("None")) {
+                            if (!suffix.equals("None") && !suffix.isEmpty()) {
                                 fullName += " " + suffix;
                             }
 

@@ -59,7 +59,8 @@ public class submitreport extends AppCompatActivity implements OnMapReadyCallbac
     private EditText description, width, height, involved;
     private Spinner spinnerBarangay;
     private ImageView previewImage;
-    private Button btnUpload, btnSubmit;
+    private FrameLayout btnUpload;
+    private Button btnSubmit;
     private ImageButton backButton;
     private ScrollView scrollView;
     private CardView mapContainer;
