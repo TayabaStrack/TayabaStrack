@@ -2,6 +2,7 @@
     <string name="app_name">TayabaStrack</string>
     <string name="register_here"><u>Register here.</u></string>
     <string-array name="tayabas_barangays">
+        <item>Select Barangay</item>
         <item>Alitao</item>
         <item>Alupay</item>
         <item>Angustias</item>

@@ -20,13 +20,22 @@ import androidx.cardview.widget.CardView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Blob;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.Timestamp;
+
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class completed extends AppCompatActivity {
 
     private LinearLayout contentLayout;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
+    private FirebaseStorage storage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +52,7 @@ public class completed extends AppCompatActivity {
         // Initialize Firebase
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
+        storage = FirebaseStorage.getInstance();
 
         // Initialize views
         contentLayout = findViewById(R.id.contentFrame);
@@ -95,10 +105,10 @@ public class completed extends AppCompatActivity {
         String userId = currentUser.getUid();
 
         // Fetch completed reports from Firestore
-        db.collection("users")
-                .document(userId)
-                .collection("reports")
-                .whereEqualTo("status", "completed")
+        // Query from root reports collection where userId matches and status is "completed"
+        db.collection("reports")
+                .whereEqualTo("userId", userId)
+                .whereIn("status", java.util.Arrays.asList("repaired", "Repaired","completed","Completed"))
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     contentLayout.removeAllViews();
@@ -168,9 +178,8 @@ public class completed extends AppCompatActivity {
                 false);
 
         // Inspection Section
-        addInfoSection(leftContainer, "Inspection:",
-                reportData.get("inspection") != null ? reportData.get("inspection").toString() : "N/A",
-                false);
+        String inspectionDate = formatTimestamp(reportData.get("inspectionDate"));
+        addInfoSection(leftContainer, "Inspection:", inspectionDate, false);
 
         // To Repair In Section
         addInfoSection(leftContainer, "To Repair In:",
@@ -178,9 +187,8 @@ public class completed extends AppCompatActivity {
                 false);
 
         // Repaired Section
-        addInfoSection(leftContainer, "Repaired:",
-                reportData.get("repaired") != null ? reportData.get("repaired").toString() : "N/A",
-                false);
+        String completionDate = formatTimestamp(reportData.get("completionDate"));
+        addInfoSection(leftContainer, "Repaired:", completionDate, false);
 
         // Right side - Image Section
         LinearLayout imageContainer = new LinearLayout(this);
@@ -200,17 +208,24 @@ public class completed extends AppCompatActivity {
         LinearLayout.LayoutParams imageParams = new LinearLayout.LayoutParams(300, 300);
         reportImage.setLayoutParams(imageParams);
 
-        // Load image if available
-        if (reportData.containsKey("incidentImage")) {
-            try {
-                Blob imageBlob = (Blob) reportData.get("incidentImage");
-                byte[] imageBytes = imageBlob.toBytes();
-                Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
-                if (bitmap != null) {
-                    reportImage.setImageBitmap(bitmap);
+        // Load image from Firebase Storage URL
+        if (reportData.containsKey("imageUrl") && reportData.get("imageUrl") != null) {
+            String imageUrl = reportData.get("imageUrl").toString();
+            loadImageFromUrl(imageUrl, reportImage);
+        } else {
+            // Try to load from old Blob format (for backward compatibility)
+            if (reportData.containsKey("incidentImage")) {
+                try {
+                    com.google.firebase.firestore.Blob imageBlob =
+                            (com.google.firebase.firestore.Blob) reportData.get("incidentImage");
+                    byte[] imageBytes = imageBlob.toBytes();
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+                    if (bitmap != null) {
+                        reportImage.setImageBitmap(bitmap);
+                    }
+                } catch (Exception e) {
+                    android.util.Log.e("Completed", "Failed to load image from Blob", e);
                 }
-            } catch (Exception e) {
-                // Image failed to load, show placeholder background
             }
         }
 
@@ -251,5 +266,75 @@ public class completed extends AppCompatActivity {
         valueParams.setMargins(0, 4, 0, 0);
         valueView.setLayoutParams(valueParams);
         container.addView(valueView);
+    }
+
+    private String formatTimestamp(Object timestampObj) {
+        if (timestampObj == null) {
+            return "N/A";
+        }
+
+        try {
+            Date date;
+
+            // Handle Firebase Timestamp
+            if (timestampObj instanceof Timestamp) {
+                Timestamp timestamp = (Timestamp) timestampObj;
+                date = timestamp.toDate();
+            }
+            // Handle com.google.firebase.Timestamp (alternative import)
+            else if (timestampObj instanceof com.google.firebase.Timestamp) {
+                com.google.firebase.Timestamp timestamp = (com.google.firebase.Timestamp) timestampObj;
+                date = timestamp.toDate();
+            }
+            // Handle Date object
+            else if (timestampObj instanceof Date) {
+                date = (Date) timestampObj;
+            }
+            // Handle String (already formatted)
+            else if (timestampObj instanceof String) {
+                return timestampObj.toString();
+            }
+            // Handle Long (milliseconds)
+            else if (timestampObj instanceof Long) {
+                date = new Date((Long) timestampObj);
+            }
+            else {
+                return "N/A";
+            }
+
+            // Format: January 1, 2025
+            SimpleDateFormat dateFormat = new SimpleDateFormat("MMMM d, yyyy", Locale.ENGLISH);
+            return dateFormat.format(date);
+
+        } catch (Exception e) {
+            android.util.Log.e("Completed", "Error formatting timestamp", e);
+            return "N/A";
+        }
+    }
+
+    private void loadImageFromUrl(String imageUrl, ImageView imageView) {
+        // Load image in background thread
+        new Thread(() -> {
+            try {
+                URL url = new URL(imageUrl);
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.setDoInput(true);
+                connection.connect();
+                InputStream input = connection.getInputStream();
+                Bitmap bitmap = BitmapFactory.decodeStream(input);
+
+                // Update UI on main thread
+                runOnUiThread(() -> {
+                    if (bitmap != null) {
+                        imageView.setImageBitmap(bitmap);
+                    }
+                });
+            } catch (Exception e) {
+                android.util.Log.e("Completed", "Failed to load image from URL: " + imageUrl, e);
+                runOnUiThread(() -> {
+                    // Keep the gray placeholder background
+                });
+            }
+        }).start();
     }
 }

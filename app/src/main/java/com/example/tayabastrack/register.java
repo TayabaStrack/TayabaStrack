@@ -18,7 +18,6 @@ import android.text.style.ClickableSpan;
 import android.text.TextPaint;
 import android.text.TextWatcher;
 import android.text.Editable;
-import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.*;
@@ -35,8 +34,10 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.Blob;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -57,15 +58,15 @@ public class register extends AppCompatActivity {
     private AutoCompleteTextView barangaySpinner, positionSpinner, suffixSpinner;
     private FirebaseAuth auth;
     private FirebaseFirestore firestore;
+    private FirebaseStorage storage;
+    private StorageReference storageRef;
 
     private static final int PICK_IMAGE_REQUEST = 100;
     private static final int CAMERA_REQUEST = 101;
     private static final int CAMERA_PERMISSION_CODE = 102;
-    private static final int MAX_IMAGE_SIZE = 1024 * 1024; // 1MB max for Firestore blob
 
     private Uri imageUri;
     private Bitmap capturedBitmap;
-    private byte[] imageBytes;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +77,8 @@ public class register extends AppCompatActivity {
         FirebaseApp.initializeApp(this);
         auth = FirebaseAuth.getInstance();
         firestore = FirebaseFirestore.getInstance();
+        storage = FirebaseStorage.getInstance();
+        storageRef = storage.getReference();
 
         // Handle system window insets
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -134,25 +137,24 @@ public class register extends AppCompatActivity {
         ArrayAdapter<String> suffixAdapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_dropdown_item_1line, suffixes);
         suffixSpinner.setAdapter(suffixAdapter);
-        suffixSpinner.setText(suffixes[0], false); // Set default
+        suffixSpinner.setText(suffixes[0], false);
 
         // Barangay dropdown
         String[] barangays = getResources().getStringArray(R.array.tayabas_barangays);
         ArrayAdapter<String> barangayAdapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_dropdown_item_1line, barangays);
         barangaySpinner.setAdapter(barangayAdapter);
-        barangaySpinner.setText(barangays[0], false); // Set default
+        barangaySpinner.setText(barangays[0], false);
 
         // Position dropdown
         String[] positions = getResources().getStringArray(R.array.barangay_positions);
         ArrayAdapter<String> positionAdapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_dropdown_item_1line, positions);
         positionSpinner.setAdapter(positionAdapter);
-        positionSpinner.setText(positions[0], false); // Set default
+        positionSpinner.setText(positions[0], false);
     }
 
     private void setupNameFilters() {
-        // Add TextWatcher to ensure only letters and spaces are entered
         TextWatcher nameWatcher = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -163,7 +165,6 @@ public class register extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) {
                 String text = s.toString();
-                // Remove any non-letter characters except spaces
                 String filtered = text.replaceAll("[^a-zA-Z ]", "");
                 if (!text.equals(filtered)) {
                     s.replace(0, s.length(), filtered);
@@ -171,12 +172,10 @@ public class register extends AppCompatActivity {
             }
         };
 
-        // Apply to all name fields
         firstNameField.addTextChangedListener(nameWatcher);
         middleNameField.addTextChangedListener(nameWatcher);
         surnameField.addTextChangedListener(nameWatcher);
 
-        // Add TextWatcher for contact number to ensure only numbers
         contactNumberField.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -187,9 +186,7 @@ public class register extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) {
                 String text = s.toString();
-                // Remove any non-digit characters
                 String filtered = text.replaceAll("[^0-9]", "");
-                // Limit to 10 digits
                 if (filtered.length() > 10) {
                     filtered = filtered.substring(0, 10);
                 }
@@ -201,13 +198,11 @@ public class register extends AppCompatActivity {
     }
 
     private void setupEventListeners() {
-        // Back button
         backButton.setOnClickListener(v -> {
             startActivity(new Intent(register.this, Login.class));
             finish();
         });
 
-        // No middle name checkbox
         noMiddleNameCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
             middleNameField.setEnabled(!isChecked);
             if (isChecked) {
@@ -215,16 +210,12 @@ public class register extends AppCompatActivity {
             }
         });
 
-        // Terms checkbox
         termsCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
             registerButton.setEnabled(isChecked);
             registerButton.setAlpha(isChecked ? 1f : 0.5f);
         });
 
-        // Register button
         registerButton.setOnClickListener(v -> registerUser());
-
-        // Upload image button
         uploadImageButton.setOnClickListener(v -> showImagePickerDialog());
     }
 
@@ -234,7 +225,6 @@ public class register extends AppCompatActivity {
         int start = text.indexOf("Terms and Conditions");
         int end = start + "Terms and Conditions".length();
 
-        // Clickable "Terms and Conditions"
         ClickableSpan clickableSpan = new ClickableSpan() {
             @Override
             public void onClick(@NonNull View widget) {
@@ -280,26 +270,20 @@ public class register extends AppCompatActivity {
         termsCheckBox.setMovementMethod(LinkMovementMethod.getInstance());
     }
 
-    // Secure password hashing method
     private String hashPassword(String password) {
         try {
-            // Generate a random salt
             SecureRandom random = new SecureRandom();
             byte[] salt = new byte[16];
             random.nextBytes(salt);
 
-            // Create MessageDigest instance for SHA-256
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             md.update(salt);
 
-            // Hash the password
             byte[] hashedPassword = md.digest(password.getBytes("UTF-8"));
 
-            // Convert salt and hash to hex strings
             String saltHex = bytesToHex(salt);
             String hashHex = bytesToHex(hashedPassword);
 
-            // Return salt:hash format
             return saltHex + ":" + hashHex;
         } catch (Exception e) {
             Log.e("Register", "Error hashing password", e);
@@ -307,7 +291,6 @@ public class register extends AppCompatActivity {
         }
     }
 
-    // Helper method to convert bytes to hex string
     private String bytesToHex(byte[] bytes) {
         StringBuilder result = new StringBuilder();
         for (byte b : bytes) {
@@ -316,52 +299,40 @@ public class register extends AppCompatActivity {
         return result.toString();
     }
 
-    // Validate Philippine mobile number (10 digits after +63)
     private boolean isValidPhoneNumber(String phoneNumber) {
-        // Check if it's exactly 10 digits and starts with 9
         return phoneNumber.matches("^9\\d{9}$");
     }
 
-    // Convert bitmap to byte array with compression
     private byte[] bitmapToByteArray(Bitmap bitmap) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        int quality = 80; // Start with 80% quality
+        int quality = 80;
 
-        bitmap.compress(Bitmap.CompressFormat.JPEG, quality, baos);
+        // Resize if too large
+        int maxWidth = 1024;
+        int maxHeight = 1024;
 
-        // Reduce quality if size exceeds 1MB
-        while (baos.toByteArray().length > MAX_IMAGE_SIZE && quality > 10) {
-            baos.reset();
-            quality -= 10;
-            bitmap.compress(Bitmap.CompressFormat.JPEG, quality, baos);
+        if (bitmap.getWidth() > maxWidth || bitmap.getHeight() > maxHeight) {
+            float scale = Math.min(
+                    (float) maxWidth / bitmap.getWidth(),
+                    (float) maxHeight / bitmap.getHeight()
+            );
+
+            int newWidth = Math.round(bitmap.getWidth() * scale);
+            int newHeight = Math.round(bitmap.getHeight() * scale);
+
+            bitmap = Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true);
         }
 
+        bitmap.compress(Bitmap.CompressFormat.JPEG, quality, baos);
         return baos.toByteArray();
     }
 
-    // Convert URI to byte array
     private byte[] uriToByteArray(Uri uri) {
         try {
             InputStream inputStream = getContentResolver().openInputStream(uri);
             Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
             if (inputStream != null) {
                 inputStream.close();
-            }
-
-            // Resize if too large
-            int maxWidth = 1024;
-            int maxHeight = 1024;
-
-            if (bitmap.getWidth() > maxWidth || bitmap.getHeight() > maxHeight) {
-                float scale = Math.min(
-                        (float) maxWidth / bitmap.getWidth(),
-                        (float) maxHeight / bitmap.getHeight()
-                );
-
-                int newWidth = Math.round(bitmap.getWidth() * scale);
-                int newHeight = Math.round(bitmap.getHeight() * scale);
-
-                bitmap = Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true);
             }
 
             return bitmapToByteArray(bitmap);
@@ -372,7 +343,6 @@ public class register extends AppCompatActivity {
     }
 
     private void registerUser() {
-        // Get form data
         String firstName = firstNameField.getText().toString().trim();
         String middleName = middleNameField.getText().toString().trim();
         String surname = surnameField.getText().toString().trim();
@@ -391,7 +361,6 @@ public class register extends AppCompatActivity {
             return;
         }
 
-        // Check if position is selected
         if (position.equals("Select Position") || position.isEmpty()) {
             Toast.makeText(this, "Please select a position", Toast.LENGTH_SHORT).show();
             return;
@@ -403,7 +372,6 @@ public class register extends AppCompatActivity {
             return;
         }
 
-        // Validate phone number
         if (!isValidPhoneNumber(contactNumber)) {
             Toast.makeText(this, "Please enter a valid Philippine mobile number (10 digits starting with 9)",
                     Toast.LENGTH_SHORT).show();
@@ -424,13 +392,6 @@ public class register extends AppCompatActivity {
         registerButton.setEnabled(false);
         registerButton.setText("Registering...");
 
-        // Prepare image data if available
-        if (imageUri != null) {
-            imageBytes = uriToByteArray(imageUri);
-        } else if (capturedBitmap != null) {
-            imageBytes = bitmapToByteArray(capturedBitmap);
-        }
-
         // Create user with Firebase Auth
         auth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
@@ -438,22 +399,26 @@ public class register extends AppCompatActivity {
                         FirebaseUser user = auth.getCurrentUser();
                         if (user != null) {
                             Log.d("Register", "Firebase Auth successful, saving user data");
-                            // Create full name with suffix
+
                             String fullName = firstName +
                                     (noMiddleNameCheckBox.isChecked() ? "" : " " + middleName) +
                                     " " + surname;
 
-                            // Add suffix if not "None"
                             if (!suffix.equals("None") && !suffix.isEmpty()) {
                                 fullName += " " + suffix;
                             }
 
-                            // Format complete phone number with country code
                             String fullPhoneNumber = "+63" + contactNumber;
 
-                            // Save user data to Firestore
-                            saveUserToFirestore(user.getUid(), fullName, email, firstName,
-                                    middleName, surname, suffix, position, barangay, fullPhoneNumber);
+                            // Upload image first if available, then save user data
+                            if (imageUri != null || capturedBitmap != null) {
+                                uploadImageToStorage(user.getUid(), fullName, email, firstName,
+                                        middleName, surname, suffix, position, barangay, fullPhoneNumber);
+                            } else {
+                                // No image, save user data directly
+                                saveUserToFirestore(user.getUid(), fullName, email, firstName,
+                                        middleName, surname, suffix, position, barangay, fullPhoneNumber, null);
+                            }
                         }
                     } else {
                         registerButton.setEnabled(true);
@@ -465,14 +430,77 @@ public class register extends AppCompatActivity {
                 });
     }
 
+    private void uploadImageToStorage(String userId, String fullName, String email, String firstName,
+                                      String middleName, String surname, String suffix, String position,
+                                      String barangay, String phoneNumber) {
+        // Verify user is authenticated
+        if (auth.getCurrentUser() == null) {
+            Log.e("Storage", "User not authenticated");
+            Toast.makeText(this, "Authentication error. Please try again.", Toast.LENGTH_SHORT).show();
+            resetRegisterButton();
+            return;
+        }
+
+        // Create a reference to store the image: user_images/{userId}/id_image.jpg
+        StorageReference imageRef = storageRef.child("user_images/" + userId + "/id_image.jpg");
+
+        byte[] imageBytes;
+        if (imageUri != null) {
+            imageBytes = uriToByteArray(imageUri);
+        } else {
+            imageBytes = bitmapToByteArray(capturedBitmap);
+        }
+
+        if (imageBytes == null) {
+            Toast.makeText(this, "Failed to process image", Toast.LENGTH_SHORT).show();
+            resetRegisterButton();
+            return;
+        }
+
+        Log.d("Storage", "Uploading image, size: " + imageBytes.length + " bytes");
+
+        // Upload the image
+        UploadTask uploadTask = imageRef.putBytes(imageBytes);
+        uploadTask.addOnSuccessListener(taskSnapshot -> {
+            // Get the download URL
+            imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                String imageUrl = uri.toString();
+                Log.d("Storage", "Image uploaded successfully. URL: " + imageUrl);
+
+                // Now save user data with image URL
+                saveUserToFirestore(userId, fullName, email, firstName, middleName, surname,
+                        suffix, position, barangay, phoneNumber, imageUrl);
+            }).addOnFailureListener(e -> {
+                Log.e("Storage", "Failed to get download URL", e);
+                resetRegisterButton();
+                Toast.makeText(register.this, "Failed to get image URL: " + e.getMessage(),
+                        Toast.LENGTH_SHORT).show();
+            });
+        }).addOnFailureListener(e -> {
+            Log.e("Storage", "Failed to upload image", e);
+            Log.e("Storage", "Error type: " + e.getClass().getName());
+            resetRegisterButton();
+
+            String errorMsg = "Failed to upload image: ";
+            if (e.getMessage() != null && e.getMessage().contains("permission")) {
+                errorMsg += "Permission denied. Please check Firebase Storage rules.";
+            } else {
+                errorMsg += e.getMessage();
+            }
+
+            Toast.makeText(register.this, errorMsg, Toast.LENGTH_LONG).show();
+        }).addOnProgressListener(snapshot -> {
+            double progress = (100.0 * snapshot.getBytesTransferred()) / snapshot.getTotalByteCount();
+            Log.d("Storage", "Upload progress: " + progress + "%");
+        });
+    }
+
     private void saveUserToFirestore(String userId, String fullName, String email, String firstName,
                                      String middleName, String surname, String suffix, String position,
-                                     String barangay, String phoneNumber) {
-        // Get the plain text password and hash it
+                                     String barangay, String phoneNumber, String imageUrl) {
         String password = passwordField.getText().toString().trim();
         String hashedPassword = hashPassword(password);
 
-        // Create user data map
         Map<String, Object> userData = new HashMap<>();
         userData.put("userId", userId);
         userData.put("fullName", fullName);
@@ -488,19 +516,14 @@ public class register extends AppCompatActivity {
         userData.put("createdAt", System.currentTimeMillis());
         userData.put("status", "pending");
 
-        // Add image as Blob if available
-        if (imageBytes != null) {
-            Blob imageBlob = Blob.fromBytes(imageBytes);
-            userData.put("idImage", imageBlob);
-            Log.d("Firestore", "Image added as Blob, size: " + imageBytes.length + " bytes");
+        // Add image URL if available
+        if (imageUrl != null) {
+            userData.put("idImageUrl", imageUrl);
+            Log.d("Firestore", "Image URL added: " + imageUrl);
         }
 
-        // Add debug logging
         Log.d("Firestore", "Attempting to save user data: " + userData.toString());
-        Log.d("Firestore", "Current user ID: " + userId);
-        Log.d("Firestore", "Phone number: " + phoneNumber);
 
-        // Save to Firestore
         firestore.collection("users").document(userId)
                 .set(userData)
                 .addOnSuccessListener(aVoid -> {
@@ -509,7 +532,6 @@ public class register extends AppCompatActivity {
                     Toast.makeText(register.this, "Registration Successful! Please log in.",
                             Toast.LENGTH_SHORT).show();
 
-                    // Sign out and redirect to login
                     auth.signOut();
                     startActivity(new Intent(register.this, Login.class));
                     finish();

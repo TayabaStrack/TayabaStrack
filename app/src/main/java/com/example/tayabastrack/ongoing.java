@@ -20,13 +20,19 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Blob;
+import com.google.firebase.storage.FirebaseStorage;
+
+import java.io.InputStream;
+import com.google.firebase.Timestamp;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 public class ongoing extends AppCompatActivity {
 
     private LinearLayout contentLayout;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
+    private FirebaseStorage storage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +49,7 @@ public class ongoing extends AppCompatActivity {
         // Initialize Firebase
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
+        storage = FirebaseStorage.getInstance();
 
         // Initialize views
         contentLayout = findViewById(R.id.contentFrame);
@@ -95,10 +102,10 @@ public class ongoing extends AppCompatActivity {
         String userId = currentUser.getUid();
 
         // Fetch ongoing reports from Firestore
-        db.collection("users")
-                .document(userId)
-                .collection("reports")
-                .whereEqualTo("status", "ongoing")
+        // Query from root reports collection where userId matches and status is "ongoing"
+        db.collection("reports")
+                .whereEqualTo("userId", userId)
+                .whereIn("status", java.util.Arrays.asList("ongoing", "Ongoing"))
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     contentLayout.removeAllViews();
@@ -179,7 +186,7 @@ public class ongoing extends AppCompatActivity {
         String description = reportData.get("description") != null ?
                 reportData.get("description").toString() : "No description";
         descriptionText.setText(description);
-        descriptionText.setTextSize(16);
+        descriptionText.setTextSize(22);
         descriptionText.setTypeface(null, android.graphics.Typeface.BOLD);
         descriptionText.setTextColor(0xFF333333);
         LinearLayout.LayoutParams descParams = new LinearLayout.LayoutParams(
@@ -203,7 +210,7 @@ public class ongoing extends AppCompatActivity {
         String barangay = reportData.get("barangay") != null ?
                 reportData.get("barangay").toString() : "No barangay";
         barangayText.setText(barangay);
-        barangayText.setTextSize(16);
+        barangayText.setTextSize(22);
         barangayText.setTypeface(null, android.graphics.Typeface.BOLD);
         barangayText.setTextColor(0xFF333333);
         LinearLayout.LayoutParams barangayParams = new LinearLayout.LayoutParams(
@@ -229,30 +236,38 @@ public class ongoing extends AppCompatActivity {
         ImageView reportImage = new ImageView(this);
         reportImage.setScaleType(ImageView.ScaleType.CENTER_CROP);
         reportImage.setBackgroundColor(0xFFC0C0C0);
-        LinearLayout.LayoutParams imageParams = new LinearLayout.LayoutParams(150, 150);
+        LinearLayout.LayoutParams imageParams = new LinearLayout.LayoutParams(300, 300);
         reportImage.setLayoutParams(imageParams);
 
-        // Load image if available
-        if (reportData.containsKey("incidentImage")) {
-            try {
-                Blob imageBlob = (Blob) reportData.get("incidentImage");
-                byte[] imageBytes = imageBlob.toBytes();
-                Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
-                if (bitmap != null) {
-                    reportImage.setImageBitmap(bitmap);
+        // Load image from Firebase Storage URL
+        if (reportData.containsKey("imageUrl") && reportData.get("imageUrl") != null) {
+            String imageUrl = reportData.get("imageUrl").toString();
+            loadImageFromUrl(imageUrl, reportImage);
+        } else {
+            // Try to load from old Blob format (for backward compatibility)
+            if (reportData.containsKey("incidentImage")) {
+                try {
+                    com.google.firebase.firestore.Blob imageBlob =
+                            (com.google.firebase.firestore.Blob) reportData.get("incidentImage");
+                    byte[] imageBytes = imageBlob.toBytes();
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+                    if (bitmap != null) {
+                        reportImage.setImageBitmap(bitmap);
+                    }
+                } catch (Exception e) {
+                    android.util.Log.e("Ongoing", "Failed to load image from Blob", e);
                 }
-            } catch (Exception e) {
-                // Image failed to load, show placeholder background
             }
         }
 
         imageContainer.addView(reportImage);
 
         // Inspection Status Section (if available)
-        if (reportData.containsKey("inspectionStatus") && reportData.get("inspectionStatus") != null) {
+        // Inspection Date Section
+        if (reportData.containsKey("inspectionDate") && reportData.get("inspectionDate") != null) {
             TextView inspectionLabel = new TextView(this);
-            inspectionLabel.setText("Inspection Status:");
-            inspectionLabel.setTextSize(14);
+            inspectionLabel.setText("Inspection Date:");
+            inspectionLabel.setTextSize(15);
             inspectionLabel.setTypeface(null, android.graphics.Typeface.BOLD);
             inspectionLabel.setTextColor(0xFF004AAD);
             LinearLayout.LayoutParams inspectionLabelParams = new LinearLayout.LayoutParams(
@@ -264,8 +279,21 @@ public class ongoing extends AppCompatActivity {
             cardContent.addView(inspectionLabel);
 
             TextView inspectionText = new TextView(this);
-            inspectionText.setText(reportData.get("inspectionStatus").toString());
+            Object dateObj = reportData.get("inspectionDate");
+
+            // Handle both Timestamp objects and String values
+            String dateString;
+            if (dateObj instanceof com.google.firebase.Timestamp) {
+                com.google.firebase.Timestamp timestamp = (com.google.firebase.Timestamp) dateObj;
+                dateString = new java.text.SimpleDateFormat("MMMM d, yyyy 'at' h:mm:ss a", java.util.Locale.US)
+                        .format(timestamp.toDate());
+            } else {
+                dateString = dateObj.toString();
+            }
+
+            inspectionText.setText(dateString);
             inspectionText.setTextSize(14);
+            inspectionText.setTypeface(null, android.graphics.Typeface.BOLD);
             inspectionText.setTextColor(0xFF333333);
             LinearLayout.LayoutParams inspectionParams = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
@@ -280,7 +308,7 @@ public class ongoing extends AppCompatActivity {
         if (reportData.containsKey("toRepairIn") && reportData.get("toRepairIn") != null) {
             TextView repairLabel = new TextView(this);
             repairLabel.setText("To Repair In:");
-            repairLabel.setTextSize(14);
+            repairLabel.setTextSize(15);
             repairLabel.setTypeface(null, android.graphics.Typeface.BOLD);
             repairLabel.setTextColor(0xFF004AAD);
             LinearLayout.LayoutParams repairLabelParams = new LinearLayout.LayoutParams(
@@ -293,7 +321,7 @@ public class ongoing extends AppCompatActivity {
 
             TextView repairText = new TextView(this);
             repairText.setText(reportData.get("toRepairIn").toString());
-            repairText.setTextSize(14);
+            repairText.setTextSize(22);
             repairText.setTextColor(0xFF333333);
             LinearLayout.LayoutParams repairParams = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
@@ -305,5 +333,31 @@ public class ongoing extends AppCompatActivity {
         }
 
         return cardView;
+    }
+
+    private void loadImageFromUrl(String imageUrl, ImageView imageView) {
+        // Load image in background thread
+        new Thread(() -> {
+            try {
+                URL url = new URL(imageUrl);
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.setDoInput(true);
+                connection.connect();
+                InputStream input = connection.getInputStream();
+                Bitmap bitmap = BitmapFactory.decodeStream(input);
+
+                // Update UI on main thread
+                runOnUiThread(() -> {
+                    if (bitmap != null) {
+                        imageView.setImageBitmap(bitmap);
+                    }
+                });
+            } catch (Exception e) {
+                android.util.Log.e("Ongoing", "Failed to load image from URL: " + imageUrl, e);
+                runOnUiThread(() -> {
+                    // Keep the gray placeholder background
+                });
+            }
+        }).start();
     }
 }

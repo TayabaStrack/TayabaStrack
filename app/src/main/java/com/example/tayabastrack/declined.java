@@ -20,13 +20,18 @@ import androidx.cardview.widget.CardView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Blob;
+import com.google.firebase.storage.FirebaseStorage;
+
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 public class declined extends AppCompatActivity {
 
     private LinearLayout contentLayout;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
+    private FirebaseStorage storage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +47,7 @@ public class declined extends AppCompatActivity {
         // Initialize Firebase
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
+        storage = FirebaseStorage.getInstance();
 
         // Initialize views
         contentLayout = findViewById(R.id.contentFrame);
@@ -94,10 +100,9 @@ public class declined extends AppCompatActivity {
         String userId = currentUser.getUid();
 
         // Fetch declined reports from Firestore
-        db.collection("users")
-                .document(userId)
-                .collection("reports")
-                .whereEqualTo("status", "declined")
+        db.collection("reports")
+                .whereEqualTo("userId", userId)
+                .whereIn("status", java.util.Arrays.asList("declined", "Declined"))
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     contentLayout.removeAllViews();
@@ -168,7 +173,7 @@ public class declined extends AppCompatActivity {
 
         // Reason Section
         addInfoSection(leftContainer, "Reason:",
-                reportData.get("reason") != null ? reportData.get("reason").toString() : "No reason provided",
+                reportData.get("declineReason") != null ? reportData.get("declineReason").toString() : "No reason provided",
                 false);
 
         // Right side - Image Section
@@ -189,17 +194,24 @@ public class declined extends AppCompatActivity {
         LinearLayout.LayoutParams imageParams = new LinearLayout.LayoutParams(300, 300);
         reportImage.setLayoutParams(imageParams);
 
-        // Load image if available
-        if (reportData.containsKey("incidentImage")) {
-            try {
-                Blob imageBlob = (Blob) reportData.get("incidentImage");
-                byte[] imageBytes = imageBlob.toBytes();
-                Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
-                if (bitmap != null) {
-                    reportImage.setImageBitmap(bitmap);
+        // Load image from Firebase Storage URL
+        if (reportData.containsKey("imageUrl") && reportData.get("imageUrl") != null) {
+            String imageUrl = reportData.get("imageUrl").toString();
+            loadImageFromUrl(imageUrl, reportImage);
+        } else {
+            // Try to load from old Blob format (for backward compatibility)
+            if (reportData.containsKey("incidentImage")) {
+                try {
+                    com.google.firebase.firestore.Blob imageBlob =
+                            (com.google.firebase.firestore.Blob) reportData.get("incidentImage");
+                    byte[] imageBytes = imageBlob.toBytes();
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+                    if (bitmap != null) {
+                        reportImage.setImageBitmap(bitmap);
+                    }
+                } catch (Exception e) {
+                    android.util.Log.e("Declined", "Failed to load image from Blob", e);
                 }
-            } catch (Exception e) {
-                // Image failed to load, show placeholder background
             }
         }
 
@@ -240,5 +252,31 @@ public class declined extends AppCompatActivity {
         valueParams.setMargins(0, 4, 0, 0);
         valueView.setLayoutParams(valueParams);
         container.addView(valueView);
+    }
+
+    private void loadImageFromUrl(String imageUrl, ImageView imageView) {
+        // Load image in background thread
+        new Thread(() -> {
+            try {
+                URL url = new URL(imageUrl);
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.setDoInput(true);
+                connection.connect();
+                InputStream input = connection.getInputStream();
+                Bitmap bitmap = BitmapFactory.decodeStream(input);
+
+                // Update UI on main thread
+                runOnUiThread(() -> {
+                    if (bitmap != null) {
+                        imageView.setImageBitmap(bitmap);
+                    }
+                });
+            } catch (Exception e) {
+                android.util.Log.e("Declined", "Failed to load image from URL: " + imageUrl, e);
+                runOnUiThread(() -> {
+                    // Keep the gray placeholder background
+                });
+            }
+        }).start();
     }
 }

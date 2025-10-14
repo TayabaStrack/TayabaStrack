@@ -69,7 +69,7 @@
                 android:textCursorDrawable="@null" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Password -->
+        <!-- Password with Eye Icon -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -78,7 +78,9 @@
             app:boxStrokeColor="#004aad"
             app:boxStrokeWidth="2dp"
             app:boxStrokeWidthFocused="3dp"
-            app:hintTextColor="@color/blue_004aad">
+            app:hintTextColor="@color/blue_004aad"
+            app:endIconMode="password_toggle"
+            app:endIconTint="#004aad">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/password"

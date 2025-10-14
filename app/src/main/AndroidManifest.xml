@@ -21,6 +21,12 @@
         android:theme="@style/Theme.TayabaStrack"
         tools:targetApi="31">
         <activity
+            android:name=".Verification"
+            android:exported="false" />
+        <activity
+            android:name=".Email_Verification"
+            android:exported="false" />
+        <activity
             android:name=".declined"
             android:exported="false" />
         <activity
