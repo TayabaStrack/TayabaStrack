@@ -4,39 +4,56 @@
     <string-array name="tayabas_barangays">
         <item>Select Barangay</item>
         <item>Alitao</item>
+        <item>Alsam Ibaba</item>
+        <item>Alsam Ilaya</item>
         <item>Alupay</item>
-        <item>Angustias</item>
-        <item>Ayahitan</item>
+        <item>Angeles Zone I</item>
+        <item>Angeles Zone II</item>
+        <item>Angeles Zone III</item>
+        <item>Angeles Zone IV</item>
+        <item>Angustias Zone I</item>
+        <item>Angustias Zone II</item>
+        <item>Angustias Zone III</item>
+        <item>Angustias Zone IV</item>
+        <item>Anos</item>
+        <item>Ayaas</item>
         <item>Baguio</item>
         <item>Banilad</item>
-        <item>Banilad Ibaba</item>
-        <item>Banilad Ilaya</item>
-        <item>Bantilan</item>
+        <item>Bukal Ibaba</item>
+        <item>Bukal Ilaya</item>
         <item>Calantas</item>
         <item>Calumpang</item>
         <item>Camaysa</item>
         <item>Dapdap</item>
-        <item>Dompol</item>
+        <item>Domoit Kanluran</item>
+        <item>Domoit Silangan</item>
+        <item>Gibanga</item>
+        <item>Ibas</item>
+        <item>Ilasan Ibaba</item>
+        <item>Ilasan Ilaya</item>
         <item>Ipilan</item>
         <item>Isabang</item>
         <item>Katigan Kanluran</item>
         <item>Katigan Silangan</item>
-        <item>Kanlurang Domoit</item>
-        <item>Kipot</item>
-        <item>Lapidario</item>
+        <item>Lakawan</item>
+        <item>Lalo</item>
         <item>Lawigue</item>
         <item>Lita</item>
-        <item>Masin Norte</item>
-        <item>Masin Sur</item>
+        <item>Malaoa</item>
+        <item>Masin</item>
         <item>Mate</item>
+        <item>Mateuna</item>
         <item>Mayowe</item>
+        <item>Nangka Ibaba</item>
+        <item>Nangka Ilaya</item>
         <item>Opias</item>
+        <item>Ibabang Palale</item>
+        <item>Ilayang Palale</item>
+        <item>Kanlurang Palale</item>
+        <item>Silangang Palale</item>
         <item>Pandakaki</item>
         <item>Pook</item>
         <item>Potol</item>
-        <item>San Diego</item>
-        <item>San Isidro</item>
-        <item>San Roque</item>
         <item>San Diego Zone I</item>
         <item>San Diego Zone II</item>
         <item>San Diego Zone III</item>
@@ -44,30 +61,13 @@
         <item>San Isidro Zone I</item>
         <item>San Isidro Zone II</item>
         <item>San Isidro Zone III</item>
+        <item>San Isidro Zone IV</item>
         <item>San Roque Zone I</item>
         <item>San Roque Zone II</item>
-        <item>San Roque Zone III</item>
-        <item>San Roque Zone IV</item>
-        <item>San Roque Zone V</item>
-        <item>San Roque Zone VI</item>
-        <item>San Roque Zone VII</item>
-        <item>San Roque Zone VIII</item>
-        <item>San Roque Zone IX</item>
-        <item>San Roque Zone X</item>
-        <item>San Roque Zone XI</item>
-        <item>San Roque Zone XII</item>
-        <item>San Roque Zone XIII</item>
-        <item>San Roque Zone XIV</item>
-        <item>San Roque Zone XV</item>
-        <item>San Roque Zone XVI</item>
-        <item>San Roque Zone XVII</item>
-        <item>San Roque Zone XVIII</item>
-        <item>San Roque Zone XIX</item>
-        <item>San Roque Zone XX</item>
-        <item>Santo Niño</item>
-        <item>Silanganin</item>
-        <item>Tagbakin</item>
-        <item>Tamisian</item>
+        <item>Talolong</item>
+        <item>Tamlong</item>
+        <item>Tongko</item>
+        <item>Valencia</item>
         <item>Wakas</item>
     </string-array>
     <string-array name="barangay_positions">

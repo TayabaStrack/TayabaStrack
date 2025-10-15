@@ -58,7 +58,7 @@ import android.util.Log;
 
 public class submitreport extends AppCompatActivity implements OnMapReadyCallback {
 
-    private EditText description, width, height, involved;
+    private EditText description, width, height;
     private Spinner spinnerBarangay;
     private ImageView previewImage;
     private FrameLayout btnUpload;
@@ -77,8 +77,6 @@ public class submitreport extends AppCompatActivity implements OnMapReadyCallbac
     private EditText searchLocation;
     private ImageButton btnSearch;
     private Geocoder geocoder;
-
-    private CheckBox checkbox_0_10, checkbox_11_18, checkbox_19_30, checkbox_31_59, checkbox_60_plus;
 
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
@@ -146,7 +144,6 @@ public class submitreport extends AppCompatActivity implements OnMapReadyCallbac
         description = findViewById(R.id.description);
         width = findViewById(R.id.width);
         height = findViewById(R.id.height);
-        involved = findViewById(R.id.involed);
         spinnerBarangay = findViewById(R.id.spinnerBarangay);
         previewImage = findViewById(R.id.previewImage);
         btnUpload = findViewById(R.id.btnUpload);
@@ -161,12 +158,6 @@ public class submitreport extends AppCompatActivity implements OnMapReadyCallbac
 
         searchLocation = findViewById(R.id.searchLocation);
         btnSearch = findViewById(R.id.btnSearch);
-
-        checkbox_0_10 = findViewById(R.id.checkbox_0_10);
-        checkbox_11_18 = findViewById(R.id.checkbox_11_18);
-        checkbox_19_30 = findViewById(R.id.checkbox_19_30);
-        checkbox_31_59 = findViewById(R.id.checkbox_31_59);
-        checkbox_60_plus = findViewById(R.id.checkbox_60_plus);
     }
 
     private void setupMapTouchHandling() {
@@ -224,40 +215,66 @@ public class submitreport extends AppCompatActivity implements OnMapReadyCallbac
         new Thread(() -> {
             try {
                 List<Address> addresses = geocoder.getFromLocationName(
-                        locationQuery + ", Tayabas, Quezon",
-                        5
+                        locationQuery + ", Tayabas, Quezon, Philippines",
+                        10
                 );
 
                 runOnUiThread(() -> {
                     searchProgress.dismiss();
 
                     if (addresses != null && !addresses.isEmpty()) {
-                        Address address = addresses.get(0);
-                        LatLng location = new LatLng(address.getLatitude(), address.getLongitude());
+                        // Tayabas city boundaries (stricter)
+                        double minLat = 14.00;
+                        double maxLat = 14.06;
+                        double minLng = 121.55;
+                        double maxLng = 121.65;
 
-                        if (selectedLocationMarker != null) {
-                            selectedLocationMarker.remove();
+                        Address validAddress = null;
+                        for (Address address : addresses) {
+                            double lat = address.getLatitude();
+                            double lng = address.getLongitude();
+
+                            Log.d("SearchLocation", "Found: " + address.getFeatureName() +
+                                    " at Lat: " + lat + ", Lng: " + lng);
+
+                            // Check if address is within Tayabas bounds
+                            if (lat >= minLat && lat <= maxLat && lng >= minLng && lng <= maxLng) {
+                                validAddress = address;
+                                Log.d("SearchLocation", "Valid address within Tayabas bounds");
+                                break;
+                            }
                         }
 
-                        selectedLocationMarker = mMap.addMarker(new MarkerOptions()
-                                .position(location)
-                                .title(address.getFeatureName() != null ? address.getFeatureName() : "Selected Location"));
+                        if (validAddress != null) {
+                            LatLng location = new LatLng(validAddress.getLatitude(), validAddress.getLongitude());
 
-                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 17));
+                            if (selectedLocationMarker != null) {
+                                selectedLocationMarker.remove();
+                            }
 
-                        selectedLocation = location;
-                        updateLocationText(location);
+                            selectedLocationMarker = mMap.addMarker(new MarkerOptions()
+                                    .position(location)
+                                    .title(validAddress.getFeatureName() != null ? validAddress.getFeatureName() : "Selected Location"));
 
-                        Toast.makeText(this, "Location found!", Toast.LENGTH_SHORT).show();
+                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 17));
+
+                            selectedLocation = location;
+                            updateLocationText(location);
+
+                            Toast.makeText(submitreport.this, "Location found in Tayabas!", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Log.d("SearchLocation", "No valid address found within Tayabas bounds");
+                            Toast.makeText(submitreport.this, "Location not found in Tayabas. Please search for a street, barangay, or landmark within Tayabas city.", Toast.LENGTH_LONG).show();
+                        }
                     } else {
-                        Toast.makeText(this, "Location not found. Try a different search term.", Toast.LENGTH_LONG).show();
+                        Toast.makeText(submitreport.this, "Location not found. Try a different search term.", Toast.LENGTH_LONG).show();
                     }
                 });
             } catch (Exception e) {
                 runOnUiThread(() -> {
                     searchProgress.dismiss();
                     Log.e("SearchLocation", "Error searching location", e);
-                    Toast.makeText(this, "Error searching location. Please try again.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(submitreport.this, "Error searching location. Please try again.", Toast.LENGTH_SHORT).show();
                 });
             }
         }).start();
@@ -542,35 +559,16 @@ public class submitreport extends AppCompatActivity implements OnMapReadyCallbac
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
-    private String getSelectedAgeGroups() {
-        StringBuilder ageGroups = new StringBuilder();
-
-        if (checkbox_0_10.isChecked()) ageGroups.append("0-10, ");
-        if (checkbox_11_18.isChecked()) ageGroups.append("11-18, ");
-        if (checkbox_19_30.isChecked()) ageGroups.append("19-30, ");
-        if (checkbox_31_59.isChecked()) ageGroups.append("31-59, ");
-        if (checkbox_60_plus.isChecked()) ageGroups.append("60+, ");
-
-        if (ageGroups.length() > 0) {
-            ageGroups.setLength(ageGroups.length() - 2);
-        }
-
-        return ageGroups.toString();
-    }
-
     private void validateAndSubmit() {
         String desc = description.getText().toString().trim();
         String w = width.getText().toString().trim();
         String h = height.getText().toString().trim();
-        String inv = involved.getText().toString().trim();
-        String ageGroups = getSelectedAgeGroups();
 
         boolean isValid = true;
 
         description.setError(null);
         width.setError(null);
         height.setError(null);
-        involved.setError(null);
 
         if (desc.isEmpty()) {
             description.setError("Description is required");
@@ -636,36 +634,6 @@ public class submitreport extends AppCompatActivity implements OnMapReadyCallbac
             }
         }
 
-        if (inv.isEmpty()) {
-            involved.setError("Number of people involved is required");
-            if (isValid) {
-                involved.requestFocus();
-                isValid = false;
-            }
-        } else {
-            try {
-                int peopleCount = Integer.parseInt(inv);
-                if (peopleCount <= 0) {
-                    involved.setError("Number of people must be greater than 0");
-                    if (isValid) {
-                        involved.requestFocus();
-                        isValid = false;
-                    }
-                }
-            } catch (NumberFormatException e) {
-                involved.setError("Please enter a valid number");
-                if (isValid) {
-                    involved.requestFocus();
-                    isValid = false;
-                }
-            }
-        }
-
-        if (ageGroups.isEmpty()) {
-            Toast.makeText(this, "Please select at least one affected age group", Toast.LENGTH_SHORT).show();
-            isValid = false;
-        }
-
         if (!isLocationSelected()) {
             Toast.makeText(this, "Please select a location on the map", Toast.LENGTH_SHORT).show();
             isValid = false;
@@ -711,7 +679,7 @@ public class submitreport extends AppCompatActivity implements OnMapReadyCallbac
             signInAnonymously();
             new android.os.Handler().postDelayed(() -> {
                 if (mAuth.getCurrentUser() != null) {
-                    submitToFirestore(desc, w, h, inv, ageGroups);
+                    submitToFirestore(desc, w, h);
                 } else {
                     Toast.makeText(this, "Authentication failed. Please try again.", Toast.LENGTH_SHORT).show();
                 }
@@ -719,10 +687,10 @@ public class submitreport extends AppCompatActivity implements OnMapReadyCallbac
             return;
         }
 
-        submitToFirestore(desc, w, h, inv, ageGroups);
+        submitToFirestore(desc, w, h);
     }
 
-    private void submitToFirestore(String desc, String widthStr, String heightStr, String involvedStr, String ageGroups) {
+    private void submitToFirestore(String desc, String widthStr, String heightStr) {
         progressDialog.setMessage("Uploading image...");
         progressDialog.show();
 
@@ -736,11 +704,11 @@ public class submitreport extends AppCompatActivity implements OnMapReadyCallbac
         String userId = currentUser.getUid();
         String reportId = UUID.randomUUID().toString();
 
-        uploadImageToStorage(reportId, userId, desc, widthStr, heightStr, involvedStr, ageGroups);
+        uploadImageToStorage(reportId, userId, desc, widthStr, heightStr);
     }
 
     private void uploadImageToStorage(String reportId, String userId, String desc, String widthStr,
-                                      String heightStr, String involvedStr, String ageGroups) {
+                                      String heightStr) {
         StorageReference imageRef = storageRef.child("report_images/" + userId + "/" + reportId + "/incident_image.jpg");
 
         byte[] imageBytes;
@@ -766,7 +734,7 @@ public class submitreport extends AppCompatActivity implements OnMapReadyCallbac
 
                 progressDialog.setMessage("Saving report...");
 
-                saveReportData(reportId, userId, desc, widthStr, heightStr, involvedStr, ageGroups, imageUrl);
+                saveReportData(reportId, userId, desc, widthStr, heightStr, imageUrl);
             }).addOnFailureListener(e -> {
                 progressDialog.dismiss();
                 Log.e("SubmitReport", "Failed to get download URL", e);
@@ -792,7 +760,7 @@ public class submitreport extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void saveReportData(String reportId, String userId, String desc, String widthStr,
-                                String heightStr, String involvedStr, String ageGroups, String imageUrl) {
+                                String heightStr, String imageUrl) {
         db.collection("users")
                 .document(userId)
                 .get()
@@ -821,8 +789,6 @@ public class submitreport extends AppCompatActivity implements OnMapReadyCallbac
                     reportData.put("description", desc);
                     reportData.put("width", Double.parseDouble(widthStr));
                     reportData.put("height", Double.parseDouble(heightStr));
-                    reportData.put("peopleInvolved", Integer.parseInt(involvedStr));
-                    reportData.put("affectedAgeGroups", ageGroups);
                     reportData.put("barangay", spinnerBarangay.getSelectedItem().toString());
                     reportData.put("latitude", location.latitude);
                     reportData.put("longitude", location.longitude);
@@ -901,14 +867,7 @@ public class submitreport extends AppCompatActivity implements OnMapReadyCallbac
         description.setText("");
         width.setText("");
         height.setText("");
-        involved.setText("");
         searchLocation.setText("");
-
-        checkbox_0_10.setChecked(false);
-        checkbox_11_18.setChecked(false);
-        checkbox_19_30.setChecked(false);
-        checkbox_31_59.setChecked(false);
-        checkbox_60_plus.setChecked(false);
 
         imageUri = null;
         capturedImageBitmap = null;

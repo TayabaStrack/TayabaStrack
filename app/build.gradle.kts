@@ -54,6 +54,9 @@ dependencies {
     implementation(libs.places)
     implementation(libs.activity)
 
+    // Android Security for encrypted storage
+    implementation(libs.securityCrypto)
+
     // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidxJunit)

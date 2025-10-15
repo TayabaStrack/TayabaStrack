@@ -13,6 +13,7 @@ places = "4.4.1"
 playServicesLocation = "21.3.0"
 playServicesMaps = "19.2.0"
 activity = "1.9.2"  # ✅ Changed from 1.11.0 to 1.9.2
+securityCrypto = "1.1.0-alpha06"
 
 [libraries]
 # AndroidX
@@ -35,6 +36,7 @@ places = { module = "com.google.android.libraries.places:places", version.ref = 
 playServicesLocation = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 playServicesMaps = { module = "com.google.android.gms:play-services-maps", version.ref = "playServicesMaps" }
 activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
+securityCrypto = { module = "androidx.security:security-crypto", version.ref = "securityCrypto" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

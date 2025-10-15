@@ -160,75 +160,6 @@
                     android:textCursorDrawable="@null" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- People Involved - REQUIRED -->
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:hint="How Many People Involved *"
-                app:boxStrokeColor="#004aad"
-                app:boxStrokeWidth="2dp"
-                app:boxStrokeWidthFocused="3dp"
-                app:hintTextColor="@color/blue_004aad">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/involed"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="number"
-                    android:textColor="@android:color/black"
-                    android:textCursorDrawable="@null" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- Affected Age Groups - REQUIRED -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Affected Age Groups: *"
-                android:textStyle="bold"
-                android:textColor="@android:color/black"
-                android:layout_marginTop="8dp" />
-
-            <CheckBox
-                android:id="@+id/checkbox_0_10"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0-10"
-                android:textColor="@android:color/black"
-                android:buttonTint="#004aad" />
-
-            <CheckBox
-                android:id="@+id/checkbox_11_18"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="11-18"
-                android:textColor="@android:color/black"
-                android:buttonTint="#004aad" />
-
-            <CheckBox
-                android:id="@+id/checkbox_19_30"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="19-30"
-                android:textColor="@android:color/black"
-                android:buttonTint="#004aad" />
-
-            <CheckBox
-                android:id="@+id/checkbox_31_59"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="31-59"
-                android:textColor="@android:color/black"
-                android:buttonTint="#004aad" />
-
-            <CheckBox
-                android:id="@+id/checkbox_60_plus"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="60+"
-                android:textColor="@android:color/black"
-                android:buttonTint="#004aad" />
-
             <!-- 🗺️ LOCATION MAP SECTION - REQUIRED -->
             <TextView
                 android:layout_width="wrap_content"
@@ -239,57 +170,68 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp" />
 
-            <!-- 🔍 Search Bar -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="8dp"
-                android:background="@drawable/blue_border_background"
-                android:padding="4dp">
-
-                <EditText
-                    android:id="@+id/searchLocation"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="Search location (e.g., street, landmark)"
-                    android:textSize="14sp"
-                    android:padding="12dp"
-                    android:background="@android:color/transparent"
-                    android:textColor="@android:color/black"
-                    android:textColorHint="#888888"
-                    android:imeOptions="actionSearch"
-                    android:inputType="text"
-                    android:maxLines="1" />
-
-                <ImageButton
-                    android:id="@+id/btnSearch"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:src="@android:drawable/ic_menu_search"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:tint="#004aad"
-                    android:contentDescription="Search location" />
-            </LinearLayout>
-
-            <!-- Map Container with Border -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/mapContainer"
+            <!-- Map Container with Search Bar Overlay -->
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="450dp"
-                android:layout_marginBottom="8dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="4dp"
-                app:cardBackgroundColor="@android:color/white">
+                android:layout_marginBottom="8dp">
 
-                <fragment
-                    android:id="@+id/maplocation"
-                    android:name="com.google.android.gms.maps.SupportMapFragment"
+                <!-- Map -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/mapContainer"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
+                    android:layout_height="match_parent"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="4dp"
+                    app:cardBackgroundColor="@android:color/white">
 
-            </androidx.cardview.widget.CardView>
+                    <fragment
+                        android:id="@+id/maplocation"
+                        android:name="com.google.android.gms.maps.SupportMapFragment"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+
+                </androidx.cardview.widget.CardView>
+
+                <!-- Search Bar Overlay (positioned at top) -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:orientation="horizontal"
+                    android:layout_gravity="top"
+                    android:layout_margin="12dp"
+                    android:background="@color/white"
+                    android:elevation="8dp"
+                    android:padding="4dp">
+
+                    <EditText
+                        android:id="@+id/searchLocation"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:hint="Search location"
+                        android:textSize="14sp"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="8dp"
+                        android:background="@android:color/transparent"
+                        android:textColor="@android:color/black"
+                        android:textColorHint="#999999"
+                        android:imeOptions="actionSearch"
+                        android:inputType="text"
+                        android:maxLines="1"
+                        android:gravity="center_vertical" />
+
+                    <ImageButton
+                        android:id="@+id/btnSearch"
+                        android:layout_width="56dp"
+                        android:layout_height="56dp"
+                        android:src="@android:drawable/ic_menu_search"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:tint="#004aad"
+                        android:contentDescription="Search location"
+                        android:scaleType="centerInside" />
+                </LinearLayout>
+            </FrameLayout>
 
             <!-- Map Instructions -->
             <TextView

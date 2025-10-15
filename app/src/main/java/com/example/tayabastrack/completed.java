@@ -178,17 +178,73 @@ public class completed extends AppCompatActivity {
                 false);
 
         // Inspection Section
-        String inspectionDate = formatTimestamp(reportData.get("inspectionDate"));
-        addInfoSection(leftContainer, "Inspection:", inspectionDate, false);
+        if (reportData.containsKey("inspectionDate") && reportData.get("inspectionDate") != null) {
+            TextView inspectionLabel = new TextView(this);
+            inspectionLabel.setText("Inspection Date:");
+            inspectionLabel.setTextSize(15);
+            inspectionLabel.setTypeface(null, android.graphics.Typeface.BOLD);
+            inspectionLabel.setTextColor(0xFF004AAD);
+            LinearLayout.LayoutParams inspectionLabelParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            inspectionLabelParams.setMargins(0, 12, 0, 4);
+            inspectionLabel.setLayoutParams(inspectionLabelParams);
+            leftContainer.addView(inspectionLabel);
+
+            TextView inspectionText = new TextView(this);
+            String inspectionDateString = formatDateOnly(reportData.get("inspectionDate"));
+
+            inspectionText.setText(inspectionDateString);
+            inspectionText.setTextSize(14);
+            inspectionText.setTypeface(null, android.graphics.Typeface.BOLD);
+            inspectionText.setTextColor(0xFF333333);
+            LinearLayout.LayoutParams inspectionParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            inspectionParams.setMargins(0, 0, 0, 12);
+            inspectionText.setLayoutParams(inspectionParams);
+            leftContainer.addView(inspectionText);
+        }
 
         // To Repair In Section
         addInfoSection(leftContainer, "To Repair In:",
                 reportData.get("toRepairIn") != null ? reportData.get("toRepairIn").toString() : "N/A",
                 false);
 
-        // Repaired Section
-        String completionDate = formatTimestamp(reportData.get("completionDate"));
-        addInfoSection(leftContainer, "Repaired:", completionDate, false);
+        // Repaired Date
+        if (reportData.containsKey("completionDate") && reportData.get("completionDate") != null) {
+            TextView repairedLabel = new TextView(this);
+            repairedLabel.setText("Repaired Date:");
+            repairedLabel.setTextSize(15);
+            repairedLabel.setTypeface(null, android.graphics.Typeface.BOLD);
+            repairedLabel.setTextColor(0xFF004AAD);
+            LinearLayout.LayoutParams repairedLabelParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            repairedLabelParams.setMargins(0, 12, 0, 4);
+            repairedLabel.setLayoutParams(repairedLabelParams);
+            leftContainer.addView(repairedLabel);
+
+            TextView repairedText = new TextView(this);
+            Object completionDateObj = reportData.get("completionDate");
+
+            String completionDateString = formatDateOnly(completionDateObj);
+
+            repairedText.setText(completionDateString);
+            repairedText.setTextSize(14);
+            repairedText.setTypeface(null, android.graphics.Typeface.BOLD);
+            repairedText.setTextColor(0xFF333333);
+            LinearLayout.LayoutParams repairedParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            repairedParams.setMargins(0, 0, 0, 12);
+            repairedText.setLayoutParams(repairedParams);
+            leftContainer.addView(repairedText);
+        }
 
         // Right side - Image Section
         LinearLayout imageContainer = new LinearLayout(this);
@@ -268,46 +324,63 @@ public class completed extends AppCompatActivity {
         container.addView(valueView);
     }
 
-    private String formatTimestamp(Object timestampObj) {
-        if (timestampObj == null) {
+    private String formatDateOnly(Object dateObj) {
+        if (dateObj == null) {
             return "N/A";
         }
 
         try {
-            Date date;
+            Date date = null;
+            String dateStr = dateObj.toString();
+
+            android.util.Log.d("Completed", "Date object type: " + dateObj.getClass().getName() + ", Value: " + dateStr);
 
             // Handle Firebase Timestamp
-            if (timestampObj instanceof Timestamp) {
-                Timestamp timestamp = (Timestamp) timestampObj;
+            if (dateObj instanceof com.google.firebase.Timestamp) {
+                com.google.firebase.Timestamp timestamp = (com.google.firebase.Timestamp) dateObj;
                 date = timestamp.toDate();
             }
-            // Handle com.google.firebase.Timestamp (alternative import)
-            else if (timestampObj instanceof com.google.firebase.Timestamp) {
-                com.google.firebase.Timestamp timestamp = (com.google.firebase.Timestamp) timestampObj;
-                date = timestamp.toDate();
-            }
-            // Handle Date object
-            else if (timestampObj instanceof Date) {
-                date = (Date) timestampObj;
-            }
-            // Handle String (already formatted)
-            else if (timestampObj instanceof String) {
-                return timestampObj.toString();
+            // Handle java.util.Date object
+            else if (dateObj instanceof java.util.Date) {
+                date = (java.util.Date) dateObj;
             }
             // Handle Long (milliseconds)
-            else if (timestampObj instanceof Long) {
-                date = new Date((Long) timestampObj);
+            else if (dateObj instanceof Long) {
+                date = new Date((Long) dateObj);
             }
+            // Handle String that might be a timestamp
+            else if (dateObj instanceof String) {
+                try {
+                    // Try parsing as Long first
+                    long timeInMillis = Long.parseLong(dateStr);
+                    date = new Date(timeInMillis);
+                } catch (NumberFormatException nfe) {
+                    // If not a number, return as is
+                    return dateStr;
+                }
+            }
+            // Fallback: try to convert to long
             else {
-                return "N/A";
+                try {
+                    long timeInMillis = Long.parseLong(dateStr);
+                    date = new Date(timeInMillis);
+                } catch (NumberFormatException nfe) {
+                    return "N/A";
+                }
             }
 
-            // Format: January 1, 2025
-            SimpleDateFormat dateFormat = new SimpleDateFormat("MMMM d, yyyy", Locale.ENGLISH);
-            return dateFormat.format(date);
+            if (date != null) {
+                // Format: Jan 1, 2025 (date only, no time, short month)
+                SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy", Locale.ENGLISH);
+                String formatted = dateFormat.format(date);
+                android.util.Log.d("Completed", "Formatted date: " + formatted);
+                return formatted;
+            }
+
+            return "N/A";
 
         } catch (Exception e) {
-            android.util.Log.e("Completed", "Error formatting timestamp", e);
+            android.util.Log.e("Completed", "Error formatting date: " + dateObj.toString(), e);
             return "N/A";
         }
     }
