@@ -16,15 +16,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main); // Make sure this matches your XML file name
+        setContentView(R.layout.activity_main);
 
         new Handler().postDelayed(new Runnable(){
             @Override
             public void run() {
-                // Create an Intent that will start the next activity
-                Intent mainIntent = new Intent(MainActivity.this, Login.class); // Replace NextActivity.class with your actual next activity
+                Intent mainIntent = new Intent(MainActivity.this, Login.class);
                 startActivity(mainIntent);
-                finish(); // Close the splash activity so the user won't come back to it
+                finish();
             }
         }, SPLASH_DISPLAY_LENGTH);
     }

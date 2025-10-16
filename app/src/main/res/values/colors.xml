@@ -4,5 +4,6 @@
     <color name="white">#FFFFFFFF</color>
     <color name="blue_004aad">#004aad</color>
     <color name="blue">#004aad</color>
-    <color name="ic_launcher_background">#FFFFFF</color>
+    <color name="blue_primary">#004aad</color>
+<!--    <color name="ic_launcher_background">#FFFFFF</color>-->
 </resources>
