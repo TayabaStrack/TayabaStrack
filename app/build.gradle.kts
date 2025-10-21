@@ -45,6 +45,7 @@ dependencies {
     implementation(libs.firebaseAuthKtx)
     implementation(libs.firebaseFirestoreKtx)
     implementation(libs.firebaseStorageKtx)
+    implementation(libs.firebaseMessagingKtx)
 
     // Google Maps API - Kotlin DSL syntax
     implementation(libs.playServicesMaps)

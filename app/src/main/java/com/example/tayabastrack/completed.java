@@ -177,10 +177,12 @@ public class completed extends AppCompatActivity {
                 reportData.get("barangay") != null ? reportData.get("barangay").toString() : "No barangay",
                 false);
 
-        // Inspection Section
-        if (reportData.containsKey("inspectionDate") && reportData.get("inspectionDate") != null) {
+        // Inspection Section (Date Range)
+        if ((reportData.containsKey("startDate") && reportData.get("startDate") != null) ||
+                (reportData.containsKey("endDate") && reportData.get("endDate") != null)) {
+
             TextView inspectionLabel = new TextView(this);
-            inspectionLabel.setText("Inspection Date:");
+            inspectionLabel.setText("Inspection:");
             inspectionLabel.setTextSize(15);
             inspectionLabel.setTypeface(null, android.graphics.Typeface.BOLD);
             inspectionLabel.setTextColor(0xFF004AAD);
@@ -193,9 +195,12 @@ public class completed extends AppCompatActivity {
             leftContainer.addView(inspectionLabel);
 
             TextView inspectionText = new TextView(this);
-            String inspectionDateString = formatDateOnly(reportData.get("inspectionDate"));
+            String startDateString = formatDateOnly(reportData.get("startDate"));
+            String endDateString = formatDateOnly(reportData.get("endDate"));
 
-            inspectionText.setText(inspectionDateString);
+            String dateRangeText = startDateString + " - " + endDateString;
+
+            inspectionText.setText(dateRangeText);
             inspectionText.setTextSize(14);
             inspectionText.setTypeface(null, android.graphics.Typeface.BOLD);
             inspectionText.setTextColor(0xFF333333);
@@ -207,11 +212,6 @@ public class completed extends AppCompatActivity {
             inspectionText.setLayoutParams(inspectionParams);
             leftContainer.addView(inspectionText);
         }
-
-        // To Repair In Section
-        addInfoSection(leftContainer, "To Repair In:",
-                reportData.get("toRepairIn") != null ? reportData.get("toRepairIn").toString() : "N/A",
-                false);
 
         // Repaired Date
         if (reportData.containsKey("completionDate") && reportData.get("completionDate") != null) {

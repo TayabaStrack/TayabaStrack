@@ -12,6 +12,7 @@ firebaseBom = "33.5.1"
 places = "4.4.1"
 playServicesLocation = "21.3.0"
 playServicesMaps = "19.2.0"
+firebaseMessaging = "23.4.0"
 activity = "1.9.2"  # ✅ Changed from 1.11.0 to 1.9.2
 securityCrypto = "1.1.0-alpha06"
 
@@ -27,6 +28,7 @@ firebaseBom = { module = "com.google.firebase:firebase-bom", version.ref = "fire
 firebaseAuthKtx = { module = "com.google.firebase:firebase-auth-ktx" }
 firebaseFirestoreKtx = { module = "com.google.firebase:firebase-firestore-ktx" }
 firebaseStorageKtx = { module = "com.google.firebase:firebase-storage-ktx" }
+firebaseMessagingKtx = { module = "com.google.firebase:firebase-messaging-ktx", version.ref = "firebaseMessaging" }
 
 # Testing
 junit = { module = "junit:junit", version.ref = "junit" }

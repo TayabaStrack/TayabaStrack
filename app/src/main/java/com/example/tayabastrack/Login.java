@@ -114,8 +114,6 @@ public class Login extends AppCompatActivity {
                             saveEmail("", false);
                         }
 
-                        Toast.makeText(Login.this, "Login Successful", Toast.LENGTH_SHORT).show();
-
                         // Get the current user ID
                         String userId = mAuth.getCurrentUser().getUid();
 
@@ -147,6 +145,11 @@ public class Login extends AppCompatActivity {
                             finish();
                         } else if ("approved".equals(status) || "active".equals(status)) {
                             // User is approved or active - go to dashboard
+                            Toast.makeText(Login.this, "Login Successful", Toast.LENGTH_SHORT).show();
+
+                            // Initialize notifications after successful login
+                            NotificationHelper.initializeNotifications();
+
                             Intent intent = new Intent(Login.this, dashboard.class);
                             startActivity(intent);
                             finish();

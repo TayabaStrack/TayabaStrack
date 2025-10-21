@@ -262,7 +262,6 @@ public class ongoing extends AppCompatActivity {
 
         imageContainer.addView(reportImage);
 
-        // Inspection Status Section (if available)
         // Inspection Date Section
         if (reportData.containsKey("inspectionDate") && reportData.get("inspectionDate") != null) {
             TextView inspectionLabel = new TextView(this);
@@ -304,8 +303,10 @@ public class ongoing extends AppCompatActivity {
             cardContent.addView(inspectionText);
         }
 
-        // To Repair In Section (if available)
-        if (reportData.containsKey("toRepairIn") && reportData.get("toRepairIn") != null) {
+        // To Repair In Section (Date Range: startDate - endDate)
+        if ((reportData.containsKey("startDate") && reportData.get("startDate") != null) ||
+                (reportData.containsKey("endDate") && reportData.get("endDate") != null)) {
+
             TextView repairLabel = new TextView(this);
             repairLabel.setText("To Repair In:");
             repairLabel.setTextSize(15);
@@ -320,8 +321,46 @@ public class ongoing extends AppCompatActivity {
             cardContent.addView(repairLabel);
 
             TextView repairText = new TextView(this);
-            repairText.setText(reportData.get("toRepairIn").toString());
-            repairText.setTextSize(22);
+
+            // Format start date
+            String startDateString = "";
+            if (reportData.containsKey("startDate") && reportData.get("startDate") != null) {
+                Object startDateObj = reportData.get("startDate");
+                if (startDateObj instanceof com.google.firebase.Timestamp) {
+                    com.google.firebase.Timestamp timestamp = (com.google.firebase.Timestamp) startDateObj;
+                    startDateString = new java.text.SimpleDateFormat("MMM d, yyyy", java.util.Locale.US)
+                            .format(timestamp.toDate());
+                } else {
+                    startDateString = startDateObj.toString();
+                }
+            }
+
+            // Format end date
+            String endDateString = "";
+            if (reportData.containsKey("endDate") && reportData.get("endDate") != null) {
+                Object endDateObj = reportData.get("endDate");
+                if (endDateObj instanceof com.google.firebase.Timestamp) {
+                    com.google.firebase.Timestamp timestamp = (com.google.firebase.Timestamp) endDateObj;
+                    endDateString = new java.text.SimpleDateFormat("MMM d, yyyy", java.util.Locale.US)
+                            .format(timestamp.toDate());
+                } else {
+                    endDateString = endDateObj.toString();
+                }
+            }
+
+            // Combine dates with hyphen
+            String dateRange = "";
+            if (!startDateString.isEmpty() && !endDateString.isEmpty()) {
+                dateRange = startDateString + " - " + endDateString;
+            } else if (!startDateString.isEmpty()) {
+                dateRange = startDateString;
+            } else if (!endDateString.isEmpty()) {
+                dateRange = endDateString;
+            }
+
+            repairText.setText(dateRange);
+            repairText.setTextSize(14);
+            repairText.setTypeface(null, android.graphics.Typeface.BOLD);
             repairText.setTextColor(0xFF333333);
             LinearLayout.LayoutParams repairParams = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,

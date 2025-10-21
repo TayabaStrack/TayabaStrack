@@ -4,11 +4,14 @@
     <!-- Existing permissions -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /> <!-- Google Maps API permissions -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!-- Google Maps API permissions -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Firebase Cloud Messaging permission -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:allowBackup="true"
@@ -31,10 +34,12 @@
             android:exported="false" />
         <activity
             android:name=".contacts"
-            android:exported="false" /> <!-- Google Maps API Key - REPLACE "YOUR_API_KEY_HERE" with your actual API key -->
+            android:exported="false" />
+        <!-- Google Maps API Key - REPLACE "YOUR_API_KEY_HERE" with your actual API key -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyA-qQHTtts5LopCcW6hzFWBvcxhXszrhWs" /> <!-- Your existing activities -->
+            android:value="AIzaSyA-qQHTtts5LopCcW6hzFWBvcxhXszrhWs" />
+        <!-- Your existing activities -->
         <activity
             android:name=".completed"
             android:exported="false" />
@@ -77,6 +82,20 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Firebase Cloud Messaging Service -->
+        <service
+            android:name=".usermanual$MyFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <!-- Default notification channel for Firebase Cloud Messaging -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="report_updates_channel" />
     </application>
 
 </manifest>
