@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_home"
+        android:icon="@drawable/homeb"
+        android:title="Home" />
+    <item
+        android:id="@+id/nav_contacts"
+        android:icon="@drawable/contacts"
+        android:title="Contacts" />
+    <item
+        android:id="@+id/nav_submit"
+        android:icon="@drawable/submit"
+        android:title="Submit Report" />
+    <item
+        android:id="@+id/nav_history"
+        android:icon="@drawable/history"
+        android:title="Reports" />
+    <item
+        android:id="@+id/nav_profile"
+        android:icon="@drawable/info"
+        android:title="Profile" />
+</menu>

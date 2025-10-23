@@ -41,8 +41,6 @@ import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.security.MessageDigest;
-import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -270,35 +268,6 @@ public class register extends AppCompatActivity {
         termsCheckBox.setMovementMethod(LinkMovementMethod.getInstance());
     }
 
-    private String hashPassword(String password) {
-        try {
-            SecureRandom random = new SecureRandom();
-            byte[] salt = new byte[16];
-            random.nextBytes(salt);
-
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            md.update(salt);
-
-            byte[] hashedPassword = md.digest(password.getBytes("UTF-8"));
-
-            String saltHex = bytesToHex(salt);
-            String hashHex = bytesToHex(hashedPassword);
-
-            return saltHex + ":" + hashHex;
-        } catch (Exception e) {
-            Log.e("Register", "Error hashing password", e);
-            return null;
-        }
-    }
-
-    private String bytesToHex(byte[] bytes) {
-        StringBuilder result = new StringBuilder();
-        for (byte b : bytes) {
-            result.append(String.format("%02x", b));
-        }
-        return result.toString();
-    }
-
     private boolean isValidPhoneNumber(String phoneNumber) {
         return phoneNumber.matches("^9\\d{9}$");
     }
@@ -498,9 +467,6 @@ public class register extends AppCompatActivity {
     private void saveUserToFirestore(String userId, String fullName, String email, String firstName,
                                      String middleName, String surname, String suffix, String position,
                                      String barangay, String phoneNumber, String imageUrl) {
-        String password = passwordField.getText().toString().trim();
-        String hashedPassword = hashPassword(password);
-
         Map<String, Object> userData = new HashMap<>();
         userData.put("userId", userId);
         userData.put("fullName", fullName);
@@ -512,7 +478,6 @@ public class register extends AppCompatActivity {
         userData.put("barangay", barangay);
         userData.put("phoneNumber", phoneNumber);
         userData.put("email", email);
-        userData.put("passwordHash", hashedPassword);
         userData.put("createdAt", System.currentTimeMillis());
         userData.put("status", "pending");
 
