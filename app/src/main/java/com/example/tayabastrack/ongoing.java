@@ -90,6 +90,46 @@ public class ongoing extends AppCompatActivity {
             startActivity(intent);
             finish();
         });
+
+        // ✅ Bottom Navigation - Home
+        ImageButton homeButton = findViewById(R.id.nav_home);
+        homeButton.setOnClickListener(v -> {
+            Intent intent = new Intent(ongoing.this, dashboard.class);
+            startActivity(intent);
+            finish();
+        });
+
+        // ✅ Bottom Navigation - Contacts
+        ImageButton contactsButton = findViewById(R.id.nav_contacts);
+        contactsButton.setOnClickListener(v -> {
+            Intent intent = new Intent(ongoing.this, contacts.class);
+            startActivity(intent);
+            finish();
+        });
+
+        // ✅ Bottom Navigation - Submit Report
+        ImageButton submitReportButton = findViewById(R.id.nav_submit);
+        submitReportButton.setOnClickListener(v -> {
+            Intent intent = new Intent(ongoing.this, submitreport.class);
+            startActivity(intent);
+            finish();
+        });
+
+        // ✅ Bottom Navigation - History (My Reports)
+        ImageButton historyButton = findViewById(R.id.nav_history);
+        historyButton.setOnClickListener(v -> {
+            Intent intent = new Intent(ongoing.this, myreports.class);
+            startActivity(intent);
+            finish();
+        });
+
+        // ✅ Bottom Navigation - Profile
+        ImageButton profileButton = findViewById(R.id.nav_profile);
+        profileButton.setOnClickListener(v -> {
+            Intent intent = new Intent(ongoing.this, myaccount.class);
+            startActivity(intent);
+            finish();
+        });
     }
 
     private void loadOngoingReports() {

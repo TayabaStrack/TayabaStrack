@@ -64,6 +64,42 @@ public class myaccount extends AppCompatActivity {
 
         // Setup event listeners
         setupEventListeners();
+        ImageButton btnNavHome = findViewById(R.id.nav_home);
+        ImageButton btnNavContacts = findViewById(R.id.nav_contacts);
+        ImageButton btnNavSubmit = findViewById(R.id.nav_submit);
+        ImageButton btnNavHistory = findViewById(R.id.nav_history);
+        ImageButton btnNavProfile = findViewById(R.id.nav_profile);
+
+        // Set click listeners for navigation
+        btnNavHome.setOnClickListener(v -> {
+            startActivity(new Intent(this, dashboard.class));
+            finish();
+        });
+
+        btnNavProfile.setOnClickListener(v -> {
+            // Already on contacts page, optionally show a toast or do nothing
+            Toast.makeText(this, "Already on Profile", Toast.LENGTH_SHORT).show();
+        });
+
+        btnNavSubmit.setOnClickListener(v -> {
+            startActivity(new Intent(this, submitreport.class));
+            finish();
+        });
+
+        btnNavContacts.setOnClickListener(v -> {
+            startActivity(new Intent(this, contacts.class));
+            finish();
+        });
+
+        btnNavHistory.setOnClickListener(v -> {
+            startActivity(new Intent(this, myreports.class));
+            finish();
+        });
+
+        btnNavProfile.setOnClickListener(v -> {
+            startActivity(new Intent(this, myaccount.class));
+            finish();
+        });
     }
 
     private void initializeViews() {

@@ -143,8 +143,8 @@
         android:background="@android:color/white"
         android:elevation="8dp"
         android:orientation="horizontal"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
+        android:paddingTop="5dp"
+        android:paddingBottom="12dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
@@ -154,12 +154,13 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:layout_marginTop="20dp">
 
             <ImageButton
                 android:id="@+id/nav_home"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
                 android:background="@null"
                 android:contentDescription="Home"
                 android:scaleType="fitCenter"
@@ -171,7 +172,7 @@
                 android:layout_marginTop="4dp"
                 android:text="Home"
                 android:textColor="#004AAD"
-                android:textSize="12sp" />
+                android:textSize="11sp" />
         </LinearLayout>
 
         <LinearLayout
@@ -179,12 +180,13 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:layout_marginTop="20dp">
 
             <ImageButton
                 android:id="@+id/nav_contacts"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
                 android:background="@null"
                 android:contentDescription="Contacts"
                 android:scaleType="fitCenter"
@@ -196,7 +198,7 @@
                 android:layout_marginTop="4dp"
                 android:text="Contacts"
                 android:textColor="#757575"
-                android:textSize="12sp" />
+                android:textSize="11sp" />
         </LinearLayout>
 
         <LinearLayout
@@ -206,22 +208,31 @@
             android:gravity="center"
             android:orientation="vertical">
 
-            <ImageButton
-                android:id="@+id/nav_submit"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:background="@null"
-                android:contentDescription="Submit Report"
-                android:scaleType="fitCenter"
-                android:src="@drawable/submit" />
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="1dp">
+
+                <ImageButton
+                    android:id="@+id/nav_submit"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:contentDescription="Submit Report"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/submit"
+                    android:elevation="1dp"
+                    android:padding="1dp" />
+            </FrameLayout>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Submit R..."
+                android:text="Submit\nReport"
+                android:textAlignment="center"
+                android:gravity="center"
                 android:textColor="#757575"
-                android:textSize="12sp" />
+                android:textSize="11sp"
+                android:lineSpacingMultiplier="0.9" />
         </LinearLayout>
 
         <LinearLayout
@@ -229,12 +240,13 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:layout_marginTop="20dp">
 
             <ImageButton
                 android:id="@+id/nav_history"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
                 android:background="@null"
                 android:contentDescription="Reports"
                 android:scaleType="fitCenter"
@@ -246,7 +258,7 @@
                 android:layout_marginTop="4dp"
                 android:text="Reports"
                 android:textColor="#757575"
-                android:textSize="12sp" />
+                android:textSize="11sp" />
         </LinearLayout>
 
         <LinearLayout
@@ -254,12 +266,13 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:layout_marginTop="20dp">
 
             <ImageButton
                 android:id="@+id/nav_profile"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
                 android:background="@null"
                 android:contentDescription="Profile"
                 android:scaleType="fitCenter"
@@ -271,7 +284,7 @@
                 android:layout_marginTop="4dp"
                 android:text="Profile"
                 android:textColor="#757575"
-                android:textSize="12sp" />
+                android:textSize="11sp" />
         </LinearLayout>
     </LinearLayout>
 

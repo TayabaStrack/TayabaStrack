@@ -90,6 +90,45 @@ public class myreports extends AppCompatActivity {
             startActivity(intent);
             finish();
         });
+
+        // ✅ Bottom Navigation - Home
+        ImageButton homeButton = findViewById(R.id.nav_home);
+        homeButton.setOnClickListener(v -> {
+            Intent intent = new Intent(myreports.this, dashboard.class);
+            startActivity(intent);
+            finish();
+        });
+
+        // ✅ Bottom Navigation - Contacts
+        ImageButton contactsButton = findViewById(R.id.nav_contacts);
+        contactsButton.setOnClickListener(v -> {
+            Intent intent = new Intent(myreports.this, contacts.class);
+            startActivity(intent);
+            finish();
+        });
+
+        // ✅ Bottom Navigation - Submit Report
+        ImageButton submitReportButton = findViewById(R.id.nav_submit);
+        submitReportButton.setOnClickListener(v -> {
+            Intent intent = new Intent(myreports.this, submitreport.class);
+            startActivity(intent);
+            finish();
+        });
+
+        // ✅ Bottom Navigation - History (My Reports)
+        ImageButton historyButton = findViewById(R.id.nav_history);
+        historyButton.setOnClickListener(v -> {
+            // Already on myreports, so just refresh or do nothing
+            Toast.makeText(myreports.this, "Already on My Reports", Toast.LENGTH_SHORT).show();
+        });
+
+        // ✅ Bottom Navigation - Profile
+        ImageButton profileButton = findViewById(R.id.nav_profile);
+        profileButton.setOnClickListener(v -> {
+            Intent intent = new Intent(myreports.this, myaccount.class);
+            startActivity(intent);
+            finish();
+        });
     }
 
     private void loadPendingReports() {
