@@ -20,11 +20,12 @@ public class Login extends AppCompatActivity {
     private TextInputEditText emailEditText, passwordEditText;
     private TextInputLayout emailLayout;
     private Button signInButton;
-    private TextView forgotPasswordText, registerButton;
+    private TextView registerButton;
     private CheckBox rememberMeCheckbox;
     private FirebaseAuth mAuth;
     private FirebaseFirestore firestore;
     private SharedPreferences sharedPreferences;
+
     private static final String PREFS_NAME = "TayabasTrackPrefs";
     private static final String KEY_EMAIL = "saved_email";
     private static final String KEY_REMEMBER = "remember_me";
@@ -34,7 +35,7 @@ public class Login extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        // Initialize Firebase Auth and Firestore
+        // Initialize Firebase
         mAuth = FirebaseAuth.getInstance();
         firestore = FirebaseFirestore.getInstance();
         sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
@@ -44,7 +45,6 @@ public class Login extends AppCompatActivity {
         passwordEditText = findViewById(R.id.password);
         emailLayout = findViewById(R.id.emailLayout);
         signInButton = findViewById(R.id.signInButton);
-        forgotPasswordText = findViewById(R.id.forgotPassword);
         registerButton = findViewById(R.id.registerButton);
         rememberMeCheckbox = findViewById(R.id.rememberMeCheckbox);
 
@@ -63,13 +63,7 @@ public class Login extends AppCompatActivity {
             }
         });
 
-        // Handle Forgot Password
-        forgotPasswordText.setOnClickListener(v -> {
-            Intent intent = new Intent(Login.this, forgotpassword.class);
-            startActivity(intent);
-        });
-
-        // Handle Register
+        // Handle Register button
         registerButton.setOnClickListener(v -> {
             Intent intent = new Intent(Login.this, register.class);
             startActivity(intent);
@@ -78,10 +72,8 @@ public class Login extends AppCompatActivity {
 
     private void loadSavedEmail() {
         boolean rememberMe = sharedPreferences.getBoolean(KEY_REMEMBER, false);
-
         if (rememberMe) {
             String savedEmail = sharedPreferences.getString(KEY_EMAIL, "");
-
             if (!savedEmail.isEmpty()) {
                 emailEditText.setText(savedEmail);
                 rememberMeCheckbox.setChecked(true);
@@ -91,12 +83,10 @@ public class Login extends AppCompatActivity {
 
     private void saveEmail(String email, boolean rememberMe) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
-
         if (rememberMe) {
             editor.putString(KEY_EMAIL, email);
             editor.putBoolean(KEY_REMEMBER, true);
         } else {
-            // Clear saved email if remember me is unchecked
             editor.putString(KEY_EMAIL, "");
             editor.putBoolean(KEY_REMEMBER, false);
         }
@@ -107,17 +97,10 @@ public class Login extends AppCompatActivity {
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        // Save email if remember me is checked
-                        if (rememberMeCheckbox.isChecked()) {
-                            saveEmail(email, true);
-                        } else {
-                            saveEmail("", false);
-                        }
+                        // Save email if "Remember Me" is checked
+                        saveEmail(email, rememberMeCheckbox.isChecked());
 
-                        // Get the current user ID
                         String userId = mAuth.getCurrentUser().getUid();
-
-                        // Check user status from Firestore
                         checkUserStatus(userId);
                     } else {
                         Toast.makeText(Login.this, "Login Failed: " +
@@ -132,38 +115,37 @@ public class Login extends AppCompatActivity {
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
                         String status = documentSnapshot.getString("status");
+                        String email = documentSnapshot.getString("email");
 
-                        if ("pending".equals(status)) {
-                            // User is pending - go to verification screen
-                            Toast.makeText(Login.this, "Your account is pending verification. Please check your email.",
-                                    Toast.LENGTH_LONG).show();
+                        switch (status != null ? status : "") {
+                            case "pending":
+                                Toast.makeText(Login.this,
+                                        "Your account is pending verification. Please check your email.",
+                                        Toast.LENGTH_LONG).show();
 
-                            String email = documentSnapshot.getString("email");
-                            Intent intent = new Intent(Login.this, Verification.class);
-                            intent.putExtra("email", email);
-                            startActivity(intent);
-                            finish();
-                        } else if ("approved".equals(status) || "active".equals(status)) {
-                            // User is approved or active - go to dashboard
-                            Toast.makeText(Login.this, "Login Successful", Toast.LENGTH_SHORT).show();
+                                Intent verifyIntent = new Intent(Login.this, Verification.class);
+                                verifyIntent.putExtra("email", email);
+                                startActivity(verifyIntent);
+                                finish();
+                                break;
 
-                            // Initialize notifications after successful login
-                            NotificationHelper.initializeNotifications();
+                            case "approved":
+                            case "active":
+                                Toast.makeText(Login.this, "Login Successful", Toast.LENGTH_SHORT).show();
+                                NotificationHelper.initializeNotifications();
+                                startActivity(new Intent(Login.this, dashboard.class));
+                                finish();
+                                break;
 
-                            Intent intent = new Intent(Login.this, dashboard.class);
-                            startActivity(intent);
-                            finish();
-                        } else {
-                            // Any other status
-                            Toast.makeText(Login.this, "Account status: " + status, Toast.LENGTH_SHORT).show();
+                            default:
+                                Toast.makeText(Login.this, "Account status: " + status, Toast.LENGTH_SHORT).show();
+                                break;
                         }
                     } else {
                         Toast.makeText(Login.this, "User data not found", Toast.LENGTH_SHORT).show();
                     }
                 })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(Login.this, "Error checking user status: " + e.getMessage(),
-                            Toast.LENGTH_SHORT).show();
-                });
+                .addOnFailureListener(e -> Toast.makeText(Login.this,
+                        "Error checking user status: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 }
