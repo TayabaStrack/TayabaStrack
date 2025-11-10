@@ -38,7 +38,7 @@
             android:layout_height="64dp"
             android:layout_marginStart="16dp"
             android:scaleType="centerCrop"
-            android:background="@drawable/tayabastracklogo"
+            android:background="@drawable/tayabastracklogo2"
             android:padding="8dp" />
 
         <!-- App Name -->
@@ -162,6 +162,24 @@
                     android:textColor="@android:color/black"
                     android:textColorHint="#004AAD"
                     android:inputType="textPersonName"
+                    android:layout_marginBottom="12dp"
+                    android:focusable="false"
+                    android:clickable="false"
+                    android:cursorVisible="false"
+                    android:longClickable="false" />
+
+                <!-- Email -->
+                <EditText
+                    android:id="@+id/etEmail"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:hint="Email"
+                    android:padding="16dp"
+                    android:background="@drawable/edit_text_border"
+                    android:textSize="16sp"
+                    android:textColor="@android:color/black"
+                    android:textColorHint="#004AAD"
+                    android:inputType="textEmailAddress"
                     android:layout_marginBottom="12dp"
                     android:focusable="false"
                     android:clickable="false"

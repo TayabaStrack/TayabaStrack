@@ -22,7 +22,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 public class myaccount extends AppCompatActivity {
 
     private TextView fullNameText, positionText;
-    private EditText etFirstName, etMiddleName, etSurname, etPosition, etPhoneNumber, etBarangay;
+    private EditText etFirstName, etMiddleName, etSurname, etEmail, etPosition, etPhoneNumber, etBarangay;
     private Button btnLogout;
     private ImageButton backButton;
 
@@ -108,6 +108,7 @@ public class myaccount extends AppCompatActivity {
         etFirstName = findViewById(R.id.etFirstName);
         etMiddleName = findViewById(R.id.etMiddleName);
         etSurname = findViewById(R.id.etSurname);
+        etEmail = findViewById(R.id.etEmail);
         etPosition = findViewById(R.id.etPosition);
         etPhoneNumber = findViewById(R.id.etPhoneNumber);
         etBarangay = findViewById(R.id.etBarangay);
@@ -119,6 +120,12 @@ public class myaccount extends AppCompatActivity {
         // Show loading state
         fullNameText.setText("Loading...");
         positionText.setText("");
+
+        // Get current user for email
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null && currentUser.getEmail() != null) {
+            etEmail.setText(currentUser.getEmail());
+        }
 
         // Fetch user data from Firestore
         db.collection("users")

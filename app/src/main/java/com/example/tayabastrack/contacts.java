@@ -69,43 +69,31 @@ public class contacts extends AppCompatActivity {
 
     // Contact card click handlers
     public void onContact1Click(View view) {
-        copyNumber("09065429497");
+        copyToClipboard("CityEngineeringOffice.tayabas@yahoo.com", "Email");
     }
 
     public void onContact2Click(View view) {
-        copyNumber("09065429497");
+        copyToClipboard("(042 911-97 46)", "Telephone Number");
     }
 
     public void onContact3Click(View view) {
-        copyNumber("09065429497");
+        copyToClipboard("09065429497", "Phone Number");
     }
 
     public void onContact4Click(View view) {
-        copyNumber("09065429497");
+        copyToClipboard("09236317022", "Phone Number");
     }
 
     public void onContact5Click(View view) {
-        copyNumber("09065429497");
+        copyToClipboard("09632728778", "Phone Number");
     }
 
-    public void onContact6Click(View view) {
-        copyNumber("09065429497");
-    }
-
-    public void onContact7Click(View view) {
-        copyNumber("09065429497");
-    }
-
-    public void onContact8Click(View view) {
-        copyNumber("09065429497");
-    }
-
-    // Helper method to copy number to clipboard
-    private void copyNumber(String number) {
+    // Helper method to copy text to clipboard
+    private void copyToClipboard(String text, String label) {
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData clip = ClipData.newPlainText("Phone Number", number);
+        ClipData clip = ClipData.newPlainText(label, text);
         clipboard.setPrimaryClip(clip);
-        Toast.makeText(this, "Number copied!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, label + " copied!", Toast.LENGTH_SHORT).show();
     }
 
     @Override

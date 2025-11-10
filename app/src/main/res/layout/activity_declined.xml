@@ -38,7 +38,7 @@
             android:layout_height="64dp"
             android:layout_marginStart="16dp"
             android:scaleType="centerCrop"
-            android:background="@drawable/tayabastracklogo"
+            android:background="@drawable/tayabastracklogo2"
             android:padding="8dp" />
 
         <!-- App Name -->

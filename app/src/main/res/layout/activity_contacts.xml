@@ -39,7 +39,7 @@
             android:layout_height="64dp"
             android:layout_marginStart="16dp"
             android:scaleType="centerCrop"
-            android:src="@drawable/tayabastracklogo"
+            android:src="@drawable/tayabastracklogo2"
             android:padding="8dp" />
 
         <!-- App Name -->
@@ -260,7 +260,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="15dp"
-                        android:text="Andreana Brondo"
+                        android:text="City Engineering Office"
                         android:textColor="#333333"
                         android:textSize="14sp"
                         android:textStyle="bold"
@@ -270,7 +270,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="5dp"
-                        android:text="Position"
+                        android:text="Email"
                         android:textColor="#666666"
                         android:textSize="12sp" />
 
@@ -278,10 +278,10 @@
                         android:id="@+id/number1"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
-                        android:text="09065429497"
+                        android:layout_marginTop="10dp"
+                        android:text="CityEngineeringOffice.tayabas@yahoo.com"
                         android:textColor="#004AAD"
-                        android:textSize="13sp"
+                        android:textSize="7sp"
                         android:textStyle="bold" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -318,7 +318,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="15dp"
-                        android:text="Andreana Brondo"
+                        android:text="City Engineering Office"
                         android:textColor="#333333"
                         android:textSize="14sp"
                         android:textStyle="bold"
@@ -328,7 +328,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="5dp"
-                        android:text="Position"
+                        android:text="Telephone Number"
                         android:textColor="#666666"
                         android:textSize="12sp" />
 
@@ -337,7 +337,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="5dp"
-                        android:text="09065429497"
+                        android:text="(042 911-97 46)"
                         android:textColor="#004AAD"
                         android:textSize="13sp"
                         android:textStyle="bold" />
@@ -386,7 +386,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="5dp"
-                        android:text="Position"
+                        android:text="Researcher"
                         android:textColor="#666666"
                         android:textSize="12sp" />
 
@@ -434,7 +434,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="15dp"
-                        android:text="Andreana Brondo"
+                        android:text="Cheska Roperez"
                         android:textColor="#333333"
                         android:textSize="14sp"
                         android:textStyle="bold"
@@ -444,7 +444,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="5dp"
-                        android:text="Position"
+                        android:text="Researcher"
                         android:textColor="#666666"
                         android:textSize="12sp" />
 
@@ -453,7 +453,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="5dp"
-                        android:text="09065429497"
+                        android:text="09236317022"
                         android:textColor="#004AAD"
                         android:textSize="13sp"
                         android:textStyle="bold" />
@@ -492,7 +492,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="15dp"
-                        android:text="Andreana Brondo"
+                        android:text="Christine Satira"
                         android:textColor="#333333"
                         android:textSize="14sp"
                         android:textStyle="bold"
@@ -502,7 +502,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="5dp"
-                        android:text="Position"
+                        android:text="Researcher"
                         android:textColor="#666666"
                         android:textSize="12sp" />
 
@@ -511,7 +511,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="5dp"
-                        android:text="09065429497"
+                        android:text="09632728778"
                         android:textColor="#004AAD"
                         android:textSize="13sp"
                         android:textStyle="bold" />
@@ -519,177 +519,13 @@
             </androidx.cardview.widget.CardView>
 
             <!-- Contact Card 6 -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/contactCard6"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:layout_margin="8dp"
-                app:cardCornerRadius="10dp"
-                app:cardElevation="4dp"
-                app:cardBackgroundColor="#FFFFFF"
-                android:foreground="?android:attr/selectableItemBackground"
-                app:strokeColor="#004AAD"
-                app:strokeWidth="2dp"
-                android:onClick="onContact6Click">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp"
-                    android:gravity="center">
-
-                    <ImageView
-                        android:layout_width="100dp"
-                        android:layout_height="100dp"
-                        android:padding="20dp"
-                        android:src="@drawable/icon" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="15dp"
-                        android:text="Andreana Brondo"
-                        android:textColor="#333333"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        android:gravity="center" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
-                        android:text="Position"
-                        android:textColor="#666666"
-                        android:textSize="12sp" />
-
-                    <TextView
-                        android:id="@+id/number6"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
-                        android:text="09065429497"
-                        android:textColor="#004AAD"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
+           ?
 
             <!-- Contact Card 7 -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/contactCard7"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:layout_margin="8dp"
-                app:cardCornerRadius="10dp"
-                app:cardElevation="4dp"
-                app:cardBackgroundColor="#FFFFFF"
-                android:foreground="?android:attr/selectableItemBackground"
-                app:strokeColor="#004AAD"
-                app:strokeWidth="2dp"
-                android:onClick="onContact7Click">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp"
-                    android:gravity="center">
-
-                    <ImageView
-                        android:layout_width="100dp"
-                        android:layout_height="100dp"
-                        android:padding="20dp"
-                        android:src="@drawable/icon" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="15dp"
-                        android:text="Andreana Brondo"
-                        android:textColor="#333333"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        android:gravity="center" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
-                        android:text="Position"
-                        android:textColor="#666666"
-                        android:textSize="12sp" />
-
-                    <TextView
-                        android:id="@+id/number7"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
-                        android:text="09065429497"
-                        android:textColor="#004AAD"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
+            ?
 
             <!-- Contact Card 8 -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/contactCard8"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:layout_margin="8dp"
-                app:cardCornerRadius="10dp"
-                app:cardBackgroundColor="#FFFFFF"
-                app:cardElevation="4dp"
-                android:foreground="?android:attr/selectableItemBackground"
-                app:strokeColor="#004AAD"
-                app:strokeWidth="2dp"
-                android:onClick="onContact8Click">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp"
-                    android:gravity="center">
-
-                    <ImageView
-                        android:layout_width="100dp"
-                        android:layout_height="100dp"
-                        android:padding="20dp"
-                        android:src="@drawable/icon" />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="15dp"
-                        android:text="Andreana Brondo"
-                        android:textColor="#333333"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        android:gravity="center" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
-                        android:text="Position"
-                        android:textColor="#666666"
-                        android:textSize="12sp" />
-
-                    <TextView
-                        android:id="@+id/number8"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
-                        android:text="09065429497"
-                        android:textColor="#004AAD"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
+            ?
 
         </GridLayout>
     </ScrollView>

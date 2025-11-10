@@ -69,12 +69,14 @@
         <activity
             android:name=".forgotpassword"
             android:exported="false" />
+        <!-- Remove the intent-filter from MainActivity -->
+        <activity android:name=".MainActivity">
+            <!-- No intent-filter here -->
+        </activity>
+
+        <!-- Add the intent-filter to LoginActivity -->
         <activity
             android:name=".Login"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/SplashTheme">
             <intent-filter>

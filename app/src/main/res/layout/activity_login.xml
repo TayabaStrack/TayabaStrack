@@ -23,7 +23,7 @@
         android:id="@+id/logoImage"
         android:layout_width="200dp"
         android:layout_height="200dp"
-        android:src="@drawable/tayabastracklogo"
+        android:src="@drawable/tayabastracklogo2"
         android:scaleType="fitCenter" />
 
     <!-- Welcome Text -->
