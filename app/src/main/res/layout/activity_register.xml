@@ -173,7 +173,7 @@
                         android:layout_height="wrap_content"
                         android:inputType="none"
                         android:textColor="@android:color/black"
-                        android:popupBackground="#004aad"
+                        android:popupBackground="@color/white"
                         android:textCursorDrawable="@null"/>
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
@@ -206,7 +206,7 @@
                         android:layout_height="wrap_content"
                         android:inputType="none"
                         android:textColor="@android:color/black"
-                        android:popupBackground="#004aad"/>
+                        android:popupBackground="@color/white"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <!-- Position Dropdown -->
@@ -228,7 +228,7 @@
                         android:layout_height="wrap_content"
                         android:inputType="none"
                         android:textColor="@android:color/black"
-                        android:popupBackground="#004aad"/>
+                        android:popupBackground="@color/white"/>
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
 
@@ -239,6 +239,7 @@
                 android:layout_height="200dp"
                 android:layout_marginBottom="16dp"
                 android:clickable="true"
+                android:background="@drawable/image_border_outline"
                 android:focusable="true">
 
                 <ImageView

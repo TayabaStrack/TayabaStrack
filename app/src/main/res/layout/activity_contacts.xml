@@ -259,7 +259,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="15dp"
+                        android:layout_marginTop="10dp"
                         android:text="City Engineering Office"
                         android:textColor="#333333"
                         android:textSize="14sp"
@@ -281,7 +281,8 @@
                         android:layout_marginTop="10dp"
                         android:text="CityEngineeringOffice.tayabas@yahoo.com"
                         android:textColor="#004AAD"
-                        android:textSize="7sp"
+                        android:textSize="8sp"
+                        android:textAlignment="center"
                         android:textStyle="bold" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -317,7 +318,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="15dp"
+                        android:layout_marginTop="10dp"
                         android:text="City Engineering Office"
                         android:textColor="#333333"
                         android:textSize="14sp"
@@ -336,7 +337,7 @@
                         android:id="@+id/number2"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
+                        android:layout_marginTop="10dp"
                         android:text="(042 911-97 46)"
                         android:textColor="#004AAD"
                         android:textSize="13sp"
@@ -375,7 +376,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="15dp"
+                        android:layout_marginTop="10dp"
                         android:text="Andreana Brondo"
                         android:textColor="#333333"
                         android:textSize="14sp"
@@ -394,7 +395,7 @@
                         android:id="@+id/number3"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
+                        android:layout_marginTop="10dp"
                         android:text="09065429497"
                         android:textColor="#004AAD"
                         android:textSize="13sp"
@@ -433,7 +434,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="15dp"
+                        android:layout_marginTop="10dp"
                         android:text="Cheska Roperez"
                         android:textColor="#333333"
                         android:textSize="14sp"
@@ -452,7 +453,7 @@
                         android:id="@+id/number4"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
+                        android:layout_marginTop="10dp"
                         android:text="09236317022"
                         android:textColor="#004AAD"
                         android:textSize="13sp"
@@ -491,7 +492,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="15dp"
+                        android:layout_marginTop="10dp"
                         android:text="Christine Satira"
                         android:textColor="#333333"
                         android:textSize="14sp"
@@ -510,7 +511,7 @@
                         android:id="@+id/number5"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
+                        android:layout_marginTop="10dp"
                         android:text="09632728778"
                         android:textColor="#004AAD"
                         android:textSize="13sp"
