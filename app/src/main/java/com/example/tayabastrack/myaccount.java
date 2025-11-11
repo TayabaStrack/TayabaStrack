@@ -1,19 +1,25 @@
 package com.example.tayabastrack;
 
-import android.app.AlertDialog;
+import static android.content.ContentValues.TAG;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -33,13 +39,31 @@ public class myaccount extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_myaccount);
 
-        // Handle system window insets
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+        // Set status bar color to match layout background and use dark icons for contrast
+        android.view.Window window = getWindow();
+        window.setStatusBarColor(android.graphics.Color.parseColor("#ffffff"));
+        WindowInsetsControllerCompat controller = new WindowInsetsControllerCompat(window, window.getDecorView());
+        controller.setAppearanceLightStatusBars(true);
+
+
+
+        View mainView = findViewById(R.id.main);
+        ViewCompat.setOnApplyWindowInsetsListener(mainView, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
+            Insets ime = insets.getInsets(WindowInsetsCompat.Type.ime());
+
+            // Apply system bars padding (status bar, navigation bar)
+            v.setPadding(
+                    systemBars.left,
+                    systemBars.top,
+                    systemBars.right,
+                    Math.max(systemBars.bottom, ime.bottom)
+            );
+
+            return WindowInsetsCompat.CONSUMED;
         });
 
         // Initialize Firebase
@@ -209,12 +233,38 @@ public class myaccount extends AppCompatActivity {
     }
 
     private void showLogoutDialog() {
-        new AlertDialog.Builder(this)
-                .setTitle("Log Out")
-                .setMessage("Are you sure you want to log out?")
-                .setPositiveButton("Log Out", (dialog, which) -> logout())
-                .setNegativeButton("Cancel", null)
-                .show();
+        androidx.appcompat.app.AlertDialog dialog = new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setMessage("Do you want to log out?")
+                .setPositiveButton("Yes", (d, w) -> {
+                    // Sign out from Firebase
+                    mAuth.signOut();
+                    Log.d(TAG, "User logged out");
+
+                    Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show();
+
+                    // Navigate to Login and clear activity stack
+                    Intent intent = new Intent(this, Login.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();
+                })
+                .setNegativeButton("No", (d, w) -> d.dismiss())
+                .create();
+
+        dialog.setOnShowListener(d -> {
+            // Set background to #004AAD and text/buttons to white
+            dialog.getWindow().setBackgroundDrawableResource(R.color.blue_004aad);
+
+            int white = ContextCompat.getColor(this, android.R.color.white);
+
+            TextView message = dialog.findViewById(android.R.id.message);
+            if (message != null) message.setTextColor(white);
+
+            dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).setTextColor(white);
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(white);
+        });
+
+        dialog.show();
     }
 
     private void logout() {

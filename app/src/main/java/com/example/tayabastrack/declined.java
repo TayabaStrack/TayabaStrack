@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -16,6 +17,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.cardview.widget.CardView;
+import androidx.core.view.WindowInsetsControllerCompat;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -38,10 +40,28 @@ public class declined extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_declined);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+        // Set status bar color to match layout background and use dark icons for contrast
+        android.view.Window window = getWindow();
+        window.setStatusBarColor(android.graphics.Color.parseColor("#ffffff"));
+        WindowInsetsControllerCompat controller = new WindowInsetsControllerCompat(window, window.getDecorView());
+        controller.setAppearanceLightStatusBars(true);
+
+
+
+        View mainView = findViewById(R.id.main);
+        ViewCompat.setOnApplyWindowInsetsListener(mainView, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
+            Insets ime = insets.getInsets(WindowInsetsCompat.Type.ime());
+
+            // Apply system bars padding (status bar, navigation bar)
+            v.setPadding(
+                    systemBars.left,
+                    systemBars.top,
+                    systemBars.right,
+                    Math.max(systemBars.bottom, ime.bottom)
+            );
+
+            return WindowInsetsCompat.CONSUMED;
         });
 
         // Initialize Firebase

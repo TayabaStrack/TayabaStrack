@@ -21,6 +21,8 @@ import android.text.Editable;
 import android.util.Log;
 import android.view.View;
 import android.widget.*;
+
+import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -29,6 +31,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.FirebaseApp;
@@ -69,7 +72,32 @@ public class register extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_register);
+
+        // Set status bar color to match layout background and use dark icons for contrast
+        android.view.Window window = getWindow();
+        window.setStatusBarColor(android.graphics.Color.parseColor("#ffffff"));
+        WindowInsetsControllerCompat controller = new WindowInsetsControllerCompat(window, window.getDecorView());
+        controller.setAppearanceLightStatusBars(true);
+
+
+
+        View mainView = findViewById(R.id.main);
+        ViewCompat.setOnApplyWindowInsetsListener(mainView, (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            Insets ime = insets.getInsets(WindowInsetsCompat.Type.ime());
+
+            // Apply system bars padding (status bar, navigation bar)
+            v.setPadding(
+                    systemBars.left,
+                    systemBars.top,
+                    systemBars.right,
+                    Math.max(systemBars.bottom, ime.bottom)
+            );
+
+            return WindowInsetsCompat.CONSUMED;
+        });
 
         // Initialize Firebase
         FirebaseApp.initializeApp(this);
@@ -77,13 +105,6 @@ public class register extends AppCompatActivity {
         firestore = FirebaseFirestore.getInstance();
         storage = FirebaseStorage.getInstance();
         storageRef = storage.getReference();
-
-        // Handle system window insets
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
 
         // Initialize Views
         initializeViews();

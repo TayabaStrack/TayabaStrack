@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 
 public class contacts extends AppCompatActivity {
 
@@ -22,10 +23,29 @@ public class contacts extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_contacts);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+
+        // Set status bar color to match layout background and use dark icons for contrast
+        android.view.Window window = getWindow();
+        window.setStatusBarColor(android.graphics.Color.parseColor("#ffffff"));
+        WindowInsetsControllerCompat controller = new WindowInsetsControllerCompat(window, window.getDecorView());
+        controller.setAppearanceLightStatusBars(true);
+
+
+
+        View mainView = findViewById(R.id.main);
+        ViewCompat.setOnApplyWindowInsetsListener(mainView, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
+            Insets ime = insets.getInsets(WindowInsetsCompat.Type.ime());
+
+            // Apply system bars padding (status bar, navigation bar)
+            v.setPadding(
+                    systemBars.left,
+                    systemBars.top,
+                    systemBars.right,
+                    Math.max(systemBars.bottom, ime.bottom)
+            );
+
+            return WindowInsetsCompat.CONSUMED;
         });
 
         // Bottom Navigation Buttons

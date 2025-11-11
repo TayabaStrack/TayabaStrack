@@ -113,7 +113,7 @@
                     android:adjustViewBounds="true"
                     android:contentDescription="App Info"
                     android:scaleType="fitCenter"
-                    android:src="@drawable/info" />
+                    android:src="@drawable/infogra" />
             </androidx.cardview.widget.CardView>
 
             <!-- New Completed Reports Section -->
