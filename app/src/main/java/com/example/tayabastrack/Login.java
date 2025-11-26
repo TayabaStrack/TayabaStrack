@@ -23,7 +23,7 @@ public class Login extends AppCompatActivity {
     private TextInputEditText emailEditText, passwordEditText;
     private TextInputLayout emailLayout;
     private Button signInButton;
-    private TextView registerButton;
+    private TextView registerButton, forgotPasswordButton;
     private CheckBox rememberMeCheckbox;
     private FirebaseAuth mAuth;
     private FirebaseFirestore firestore;
@@ -55,6 +55,7 @@ public class Login extends AppCompatActivity {
         emailLayout = findViewById(R.id.emailLayout);
         signInButton = findViewById(R.id.signInButton);
         registerButton = findViewById(R.id.registerButton);
+        forgotPasswordButton = findViewById(R.id.forgotPasswordButton);
         rememberMeCheckbox = findViewById(R.id.rememberMeCheckbox);
 
         // Load saved email if "Remember Me" was checked
@@ -75,6 +76,12 @@ public class Login extends AppCompatActivity {
         // Handle Register button
         registerButton.setOnClickListener(v -> {
             Intent intent = new Intent(Login.this, register.class);
+            startActivity(intent);
+        });
+
+        // Handle Forgot Password button
+        forgotPasswordButton.setOnClickListener(v -> {
+            Intent intent = new Intent(Login.this, forgotpassword.class);
             startActivity(intent);
         });
     }

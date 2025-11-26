@@ -10,6 +10,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.text.SpannableString;
 import android.text.Spanned;
@@ -40,7 +42,6 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -58,9 +59,6 @@ public class register extends AppCompatActivity {
     private TextInputEditText firstNameField, middleNameField, surnameField, contactNumberField;
     private AutoCompleteTextView barangaySpinner, positionSpinner, suffixSpinner;
     private FirebaseAuth auth;
-    private FirebaseFirestore firestore;
-    private FirebaseStorage storage;
-    private StorageReference storageRef;
 
     private static final int PICK_IMAGE_REQUEST = 100;
     private static final int CAMERA_REQUEST = 101;
@@ -75,20 +73,16 @@ public class register extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_register);
 
-        // Set status bar color to match layout background and use dark icons for contrast
         android.view.Window window = getWindow();
         window.setStatusBarColor(android.graphics.Color.parseColor("#ffffff"));
         WindowInsetsControllerCompat controller = new WindowInsetsControllerCompat(window, window.getDecorView());
         controller.setAppearanceLightStatusBars(true);
-
-
 
         View mainView = findViewById(R.id.main);
         ViewCompat.setOnApplyWindowInsetsListener(mainView, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             Insets ime = insets.getInsets(WindowInsetsCompat.Type.ime());
 
-            // Apply system bars padding (status bar, navigation bar)
             v.setPadding(
                     systemBars.left,
                     systemBars.top,
@@ -102,32 +96,21 @@ public class register extends AppCompatActivity {
         // Initialize Firebase
         FirebaseApp.initializeApp(this);
         auth = FirebaseAuth.getInstance();
-        firestore = FirebaseFirestore.getInstance();
-        storage = FirebaseStorage.getInstance();
-        storageRef = storage.getReference();
 
         // Initialize Views
         initializeViews();
-
-        // Setup dropdowns
         setupDropdowns();
-
-        // Setup event listeners
         setupEventListeners();
-
-        // Make Terms clickable
         setupTermsAndConditions();
     }
 
     private void initializeViews() {
-        // Basic views
         termsCheckBox = findViewById(R.id.termsCheckBox);
         registerButton = findViewById(R.id.registerButton);
         uploadImageButton = findViewById(R.id.UploadID);
         profileImageView = findViewById(R.id.ID);
         backButton = findViewById(R.id.backButton);
 
-        // Form fields
         firstNameField = findViewById(R.id.fname);
         middleNameField = findViewById(R.id.mname);
         surnameField = findViewById(R.id.sname);
@@ -136,36 +119,30 @@ public class register extends AppCompatActivity {
         passwordField = findViewById(R.id.password);
         confirmPasswordField = findViewById(R.id.confirmpassword);
 
-        // Checkbox and dropdowns (AutoCompleteTextView)
         noMiddleNameCheckBox = findViewById(R.id.no_mname);
         barangaySpinner = findViewById(R.id.spinnerBarangay);
         positionSpinner = findViewById(R.id.spinnerPosition);
         suffixSpinner = findViewById(R.id.spinnerSuffix);
 
-        // Disable register until terms accepted
         registerButton.setEnabled(false);
         registerButton.setAlpha(0.5f);
 
-        // Add input filters for names (letters only)
         setupNameFilters();
     }
 
     private void setupDropdowns() {
-        // Suffix dropdown
         String[] suffixes = getResources().getStringArray(R.array.name_suffixes);
         ArrayAdapter<String> suffixAdapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_dropdown_item_1line, suffixes);
         suffixSpinner.setAdapter(suffixAdapter);
         suffixSpinner.setText(suffixes[0], false);
 
-        // Barangay dropdown
         String[] barangays = getResources().getStringArray(R.array.tayabas_barangays);
         ArrayAdapter<String> barangayAdapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_dropdown_item_1line, barangays);
         barangaySpinner.setAdapter(barangayAdapter);
         barangaySpinner.setText(barangays[0], false);
 
-        // Position dropdown
         String[] positions = getResources().getStringArray(R.array.barangay_positions);
         ArrayAdapter<String> positionAdapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_dropdown_item_1line, positions);
@@ -293,11 +270,14 @@ public class register extends AppCompatActivity {
         return phoneNumber.matches("^9\\d{9}$");
     }
 
+    private boolean isValidEmail(String email) {
+        return email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
+    }
+
     private byte[] bitmapToByteArray(Bitmap bitmap) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         int quality = 80;
 
-        // Resize if too large
         int maxWidth = 1024;
         int maxHeight = 1024;
 
@@ -317,21 +297,6 @@ public class register extends AppCompatActivity {
         return baos.toByteArray();
     }
 
-    private byte[] uriToByteArray(Uri uri) {
-        try {
-            InputStream inputStream = getContentResolver().openInputStream(uri);
-            Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-            if (inputStream != null) {
-                inputStream.close();
-            }
-
-            return bitmapToByteArray(bitmap);
-        } catch (Exception e) {
-            Log.e("Register", "Error converting URI to byte array", e);
-            return null;
-        }
-    }
-
     private void registerUser() {
         String firstName = firstNameField.getText().toString().trim();
         String middleName = middleNameField.getText().toString().trim();
@@ -348,6 +313,11 @@ public class register extends AppCompatActivity {
         if (firstName.isEmpty() || surname.isEmpty() ||
                 contactNumber.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
             Toast.makeText(this, "Please fill all required fields", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (!isValidEmail(email)) {
+            Toast.makeText(this, "Please enter a valid email address", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -380,159 +350,46 @@ public class register extends AppCompatActivity {
 
         // Show loading
         registerButton.setEnabled(false);
-        registerButton.setText("Registering...");
+        registerButton.setText("Processing...");
 
-        // Create user with Firebase Auth
-        auth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, task -> {
-                    if (task.isSuccessful()) {
-                        FirebaseUser user = auth.getCurrentUser();
-                        if (user != null) {
-                            Log.d("Register", "Firebase Auth successful, saving user data");
+        // Build full name
+        String fullName = firstName +
+                (noMiddleNameCheckBox.isChecked() ? "" : " " + middleName) +
+                " " + surname;
 
-                            String fullName = firstName +
-                                    (noMiddleNameCheckBox.isChecked() ? "" : " " + middleName) +
-                                    " " + surname;
-
-                            if (!suffix.equals("None") && !suffix.isEmpty()) {
-                                fullName += " " + suffix;
-                            }
-
-                            String fullPhoneNumber = "+63" + contactNumber;
-
-                            // Upload image first if available, then save user data
-                            if (imageUri != null || capturedBitmap != null) {
-                                uploadImageToStorage(user.getUid(), fullName, email, firstName,
-                                        middleName, surname, suffix, position, barangay, fullPhoneNumber);
-                            } else {
-                                // No image, save user data directly
-                                saveUserToFirestore(user.getUid(), fullName, email, firstName,
-                                        middleName, surname, suffix, position, barangay, fullPhoneNumber, null);
-                            }
-                        }
-                    } else {
-                        registerButton.setEnabled(true);
-                        registerButton.setText("Register");
-                        Toast.makeText(register.this, "Registration failed: " +
-                                task.getException().getMessage(), Toast.LENGTH_LONG).show();
-                        Log.e("Register", "Firebase Auth failed", task.getException());
-                    }
-                });
-    }
-
-    private void uploadImageToStorage(String userId, String fullName, String email, String firstName,
-                                      String middleName, String surname, String suffix, String position,
-                                      String barangay, String phoneNumber) {
-        // Verify user is authenticated
-        if (auth.getCurrentUser() == null) {
-            Log.e("Storage", "User not authenticated");
-            Toast.makeText(this, "Authentication error. Please try again.", Toast.LENGTH_SHORT).show();
-            resetRegisterButton();
-            return;
+        if (!suffix.equals("None") && !suffix.isEmpty()) {
+            fullName += " " + suffix;
         }
 
-        // Create a reference to store the image: user_images/{userId}/id_image.jpg
-        StorageReference imageRef = storageRef.child("user_images/" + userId + "/id_image.jpg");
+        String fullPhoneNumber = "+63" + contactNumber;
 
-        byte[] imageBytes;
-        if (imageUri != null) {
-            imageBytes = uriToByteArray(imageUri);
-        } else {
-            imageBytes = bitmapToByteArray(capturedBitmap);
+        // Prepare user data to pass to verification activity
+        UserRegistrationData userData = new UserRegistrationData(
+                email,
+                password,
+                fullName,
+                firstName,
+                middleName,
+                surname,
+                suffix,
+                position,
+                barangay,
+                fullPhoneNumber,
+                imageUri,
+                capturedBitmap
+        );
+
+        // Go to Email Verification WITHOUT creating account yet
+        try {
+            Intent intent = new Intent(register.this, Email_Verification.class);
+            intent.putExtra("userData", userData);
+            startActivity(intent);
+        } catch (Exception e) {
+            Log.e("Registration", "Error navigating to Email_Verification", e);
+            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            registerButton.setEnabled(true);
+            registerButton.setText("Register");
         }
-
-        if (imageBytes == null) {
-            Toast.makeText(this, "Failed to process image", Toast.LENGTH_SHORT).show();
-            resetRegisterButton();
-            return;
-        }
-
-        Log.d("Storage", "Uploading image, size: " + imageBytes.length + " bytes");
-
-        // Upload the image
-        UploadTask uploadTask = imageRef.putBytes(imageBytes);
-        uploadTask.addOnSuccessListener(taskSnapshot -> {
-            // Get the download URL
-            imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
-                String imageUrl = uri.toString();
-                Log.d("Storage", "Image uploaded successfully. URL: " + imageUrl);
-
-                // Now save user data with image URL
-                saveUserToFirestore(userId, fullName, email, firstName, middleName, surname,
-                        suffix, position, barangay, phoneNumber, imageUrl);
-            }).addOnFailureListener(e -> {
-                Log.e("Storage", "Failed to get download URL", e);
-                resetRegisterButton();
-                Toast.makeText(register.this, "Failed to get image URL: " + e.getMessage(),
-                        Toast.LENGTH_SHORT).show();
-            });
-        }).addOnFailureListener(e -> {
-            Log.e("Storage", "Failed to upload image", e);
-            Log.e("Storage", "Error type: " + e.getClass().getName());
-            resetRegisterButton();
-
-            String errorMsg = "Failed to upload image: ";
-            if (e.getMessage() != null && e.getMessage().contains("permission")) {
-                errorMsg += "Permission denied. Please check Firebase Storage rules.";
-            } else {
-                errorMsg += e.getMessage();
-            }
-
-            Toast.makeText(register.this, errorMsg, Toast.LENGTH_LONG).show();
-        }).addOnProgressListener(snapshot -> {
-            double progress = (100.0 * snapshot.getBytesTransferred()) / snapshot.getTotalByteCount();
-            Log.d("Storage", "Upload progress: " + progress + "%");
-        });
-    }
-
-    private void saveUserToFirestore(String userId, String fullName, String email, String firstName,
-                                     String middleName, String surname, String suffix, String position,
-                                     String barangay, String phoneNumber, String imageUrl) {
-        Map<String, Object> userData = new HashMap<>();
-        userData.put("userId", userId);
-        userData.put("fullName", fullName);
-        userData.put("firstName", firstName);
-        userData.put("middleName", noMiddleNameCheckBox.isChecked() ? "" : middleName);
-        userData.put("surname", surname);
-        userData.put("suffix", suffix.equals("None") ? "" : suffix);
-        userData.put("position", position);
-        userData.put("barangay", barangay);
-        userData.put("phoneNumber", phoneNumber);
-        userData.put("email", email);
-        userData.put("createdAt", System.currentTimeMillis());
-        userData.put("status", "pending");
-
-        // Add image URL if available
-        if (imageUrl != null) {
-            userData.put("idImageUrl", imageUrl);
-            Log.d("Firestore", "Image URL added: " + imageUrl);
-        }
-
-        Log.d("Firestore", "Attempting to save user data: " + userData.toString());
-
-        firestore.collection("users").document(userId)
-                .set(userData)
-                .addOnSuccessListener(aVoid -> {
-                    Log.d("Firestore", "User data saved successfully");
-                    resetRegisterButton();
-                    Toast.makeText(register.this, "Registration Successful! Please log in.",
-                            Toast.LENGTH_SHORT).show();
-
-                    auth.signOut();
-                    startActivity(new Intent(register.this, Login.class));
-                    finish();
-                })
-                .addOnFailureListener(e -> {
-                    Log.e("Firestore", "Failed to save user data", e);
-                    resetRegisterButton();
-                    Toast.makeText(register.this, "Failed to save user data: " + e.getMessage(),
-                            Toast.LENGTH_LONG).show();
-                });
-    }
-
-    private void resetRegisterButton() {
-        registerButton.setEnabled(true);
-        registerButton.setText("Register");
     }
 
     private void showImagePickerDialog() {
@@ -594,6 +451,107 @@ public class register extends AppCompatActivity {
             } else {
                 Toast.makeText(this, "Camera permission is required!", Toast.LENGTH_SHORT).show();
             }
+        }
+    }
+
+    // Data class to pass registration info to Email Verification
+    public static class UserRegistrationData implements Parcelable {
+        public String email;
+        public String password;
+        public String fullName;
+        public String firstName;
+        public String middleName;
+        public String surname;
+        public String suffix;
+        public String position;
+        public String barangay;
+        public String phoneNumber;
+        public String imageUriString;
+        public byte[] imageBytes;
+
+        public UserRegistrationData(String email, String password, String fullName,
+                                    String firstName, String middleName, String surname,
+                                    String suffix, String position, String barangay,
+                                    String phoneNumber, Uri imageUri, Bitmap capturedBitmap) {
+            this.email = email;
+            this.password = password;
+            this.fullName = fullName;
+            this.firstName = firstName;
+            this.middleName = middleName;
+            this.surname = surname;
+            this.suffix = suffix;
+            this.position = position;
+            this.barangay = barangay;
+            this.phoneNumber = phoneNumber;
+
+            this.imageUriString = imageUri != null ? imageUri.toString() : null;
+
+            if (capturedBitmap != null) {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                capturedBitmap.compress(Bitmap.CompressFormat.JPEG, 80, baos);
+                this.imageBytes = baos.toByteArray();
+            } else {
+                this.imageBytes = null;
+            }
+        }
+
+        protected UserRegistrationData(Parcel in) {
+            email = in.readString();
+            password = in.readString();
+            fullName = in.readString();
+            firstName = in.readString();
+            middleName = in.readString();
+            surname = in.readString();
+            suffix = in.readString();
+            position = in.readString();
+            barangay = in.readString();
+            phoneNumber = in.readString();
+            imageUriString = in.readString();
+            imageBytes = in.createByteArray();
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(email);
+            dest.writeString(password);
+            dest.writeString(fullName);
+            dest.writeString(firstName);
+            dest.writeString(middleName);
+            dest.writeString(surname);
+            dest.writeString(suffix);
+            dest.writeString(position);
+            dest.writeString(barangay);
+            dest.writeString(phoneNumber);
+            dest.writeString(imageUriString);
+            dest.writeByteArray(imageBytes);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        public static final Creator<UserRegistrationData> CREATOR = new Creator<UserRegistrationData>() {
+            @Override
+            public UserRegistrationData createFromParcel(Parcel in) {
+                return new UserRegistrationData(in);
+            }
+
+            @Override
+            public UserRegistrationData[] newArray(int size) {
+                return new UserRegistrationData[size];
+            }
+        };
+
+        public Uri getImageUri() {
+            return imageUriString != null ? Uri.parse(imageUriString) : null;
+        }
+
+        public Bitmap getCapturedBitmap() {
+            if (imageBytes != null && imageBytes.length > 0) {
+                return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+            }
+            return null;
         }
     }
 }

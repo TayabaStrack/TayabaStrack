@@ -92,16 +92,39 @@
                 android:textCursorDrawable="@null" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Remember Me Checkbox -->
-        <CheckBox
-            android:id="@+id/rememberMeCheckbox"
-            android:layout_width="wrap_content"
+        <!-- Remember Me and Forgot Password Row -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            android:text="Remember me"
-            android:textColor="@android:color/black"
-            android:textSize="14sp"
-            android:buttonTint="#004aad" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <!-- Remember Me Checkbox -->
+            <CheckBox
+                android:id="@+id/rememberMeCheckbox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Remember me"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                android:buttonTint="#004aad" />
+
+            <!-- Forgot Password Link -->
+            <TextView
+                android:id="@+id/forgotPasswordButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Forgot Password?"
+                android:textColor="#004aad"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="4dp" />
+        </LinearLayout>
 
         <!-- Login Button -->
         <Button

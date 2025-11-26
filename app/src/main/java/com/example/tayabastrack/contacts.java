@@ -113,7 +113,6 @@ public class contacts extends AppCompatActivity {
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         ClipData clip = ClipData.newPlainText(label, text);
         clipboard.setPrimaryClip(clip);
-        Toast.makeText(this, label + " copied!", Toast.LENGTH_SHORT).show();
     }
 
     @Override
