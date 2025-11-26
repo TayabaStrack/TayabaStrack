@@ -22,6 +22,12 @@
         android:theme="@style/Theme.TayabaStrack"
         tools:targetApi="31">
         <activity
+            android:name=".NewPassword"
+            android:exported="false" />
+        <activity
+            android:name=".PasswordResetVerification"
+            android:exported="false" />
+        <activity
             android:name=".forgotpassword2"
             android:exported="false" />
         <activity

@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -45,6 +46,7 @@ public class Email_Verification extends AppCompatActivity {
     private String verificationCode;
     private long resendTimer = 0;
     private static final long RESEND_TIMEOUT = 60000; // 60 seconds
+    private CountDownTimer countDownTimer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,9 +109,8 @@ public class Email_Verification extends AppCompatActivity {
             if (System.currentTimeMillis() > resendTimer) {
                 sendOTPEmail();
             } else {
-                long remainingTime = (resendTimer - System.currentTimeMillis()) / 1000;
                 Toast.makeText(Email_Verification.this,
-                        "Please wait " + remainingTime + " seconds before requesting a new code",
+                        "Please wait before requesting a new code",
                         Toast.LENGTH_SHORT).show();
             }
         });
@@ -140,6 +141,9 @@ public class Email_Verification extends AppCompatActivity {
 
                     // Set resend timer
                     resendTimer = System.currentTimeMillis() + RESEND_TIMEOUT;
+
+                    // Start countdown
+                    startResendCountdown();
 
                     Toast.makeText(Email_Verification.this,
                             "Verification code sent to " + userData.email,
@@ -506,5 +510,40 @@ public class Email_Verification extends AppCompatActivity {
         otpBox3.setText("");
         otpBox4.setText("");
         otpBox1.requestFocus();
+    }
+
+    private void startResendCountdown() {
+        // Cancel existing timer if any
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
+        }
+
+        // Disable resend button and show countdown
+        resendCode.setEnabled(false);
+        resendCode.setAlpha(0.5f);
+
+        countDownTimer = new CountDownTimer(RESEND_TIMEOUT, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                long secondsRemaining = millisUntilFinished / 1000;
+                resendCode.setText("RESEND CODE (" + secondsRemaining + "s)");
+            }
+
+            @Override
+            public void onFinish() {
+                resendCode.setText("RESEND NEW CODE");
+                resendCode.setEnabled(true);
+                resendCode.setAlpha(1.0f);
+            }
+        }.start();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Cancel timer to prevent memory leaks
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
+        }
     }
 }
