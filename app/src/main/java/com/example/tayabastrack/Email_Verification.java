@@ -52,6 +52,11 @@ public class Email_Verification extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_email_verification);
+        android.view.Window window = getWindow();
+        window.setStatusBarColor(android.graphics.Color.parseColor("#ffffff"));
+        androidx.core.view.WindowInsetsControllerCompat controller =
+                new androidx.core.view.WindowInsetsControllerCompat(window, window.getDecorView());
+        controller.setAppearanceLightStatusBars(true);
 
         Log.d("EmailVerification", "onCreate called");
 

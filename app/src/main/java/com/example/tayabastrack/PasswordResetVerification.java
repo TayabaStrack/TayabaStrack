@@ -37,7 +37,11 @@ public class PasswordResetVerification extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_password_reset_verification);
-
+        android.view.Window window = getWindow();
+        window.setStatusBarColor(android.graphics.Color.parseColor("#ffffff"));
+        androidx.core.view.WindowInsetsControllerCompat controller =
+                new androidx.core.view.WindowInsetsControllerCompat(window, window.getDecorView());
+        controller.setAppearanceLightStatusBars(true);
         // Initialize Firebase
         db = FirebaseFirestore.getInstance();
 

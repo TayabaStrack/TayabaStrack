@@ -34,6 +34,13 @@ public class forgotpassword extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_forgotpassword);
 
+        // Set status bar color to white with dark icons
+        android.view.Window window = getWindow();
+        window.setStatusBarColor(android.graphics.Color.parseColor("#ffffff"));
+        androidx.core.view.WindowInsetsControllerCompat controller =
+                new androidx.core.view.WindowInsetsControllerCompat(window, window.getDecorView());
+        controller.setAppearanceLightStatusBars(true);
+
         // Initialize Firebase
         db = FirebaseFirestore.getInstance();
 
@@ -157,7 +164,7 @@ public class forgotpassword extends AppCompatActivity {
                     "\n\nBest regards," +
                     "\nTayabasTrack Team");
             put("html", "<div style='font-family: Arial, sans-serif; padding: 20px; max-width: 600px;'>" +
-                    "<h2 style='color: #004AAD;'>TayabasTrack Password Reset</h2>" +
+                    "<h2 style='color: #ffffff;'>TayabasTrack Password Reset</h2>" +
                     "<p>You requested to reset your password. Your verification code is:</p>" +
                     "<div style='background: #f0f0f0; padding: 20px; text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 10px; color: #004AAD; margin: 20px 0;'>" +
                     code +
