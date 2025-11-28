@@ -68,7 +68,7 @@ import android.util.Log;
 public class submitreport extends AppCompatActivity implements OnMapReadyCallback {
 
     private EditText description, width, height;
-    private Spinner spinnerBarangay;
+    private Spinner spinnerBarangay, spinnerCategory, spinnerIssue;
     private ImageView previewImage;
     private FrameLayout btnUpload;
     private Button btnSubmit;
@@ -174,6 +174,8 @@ public class submitreport extends AppCompatActivity implements OnMapReadyCallbac
         width = findViewById(R.id.width);
         height = findViewById(R.id.height);
         spinnerBarangay = findViewById(R.id.spinnerBarangay);
+        spinnerCategory = findViewById(R.id.spinnerCategory);
+        spinnerIssue = findViewById(R.id.spinnerIssue);
         previewImage = findViewById(R.id.previewImage);
         btnUpload = findViewById(R.id.btnUpload);
         btnSubmit = findViewById(R.id.btnSubmit);
@@ -477,8 +479,6 @@ public class submitreport extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-
-
     private byte[] bitmapToByteArray(Bitmap bitmap) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         int maxWidth = 1920;  // Increased for better quality
@@ -619,11 +619,7 @@ public class submitreport extends AppCompatActivity implements OnMapReadyCallbac
         width.setError(null);
         height.setError(null);
 
-        if (desc.isEmpty() || desc.length() < 10) {
-            description.setError(desc.isEmpty() ? "Description required" : "Min 10 characters");
-            description.requestFocus();
-            isValid = false;
-        }
+        // Description is now OPTIONAL - no validation needed
 
         if (w.isEmpty()) {
             width.setError("Width required");
@@ -662,6 +658,16 @@ public class submitreport extends AppCompatActivity implements OnMapReadyCallbac
 
         if (spinnerBarangay.getSelectedItemPosition() == 0) {
             Toast.makeText(this, "Select a Barangay", Toast.LENGTH_SHORT).show();
+            isValid = false;
+        }
+
+        if (spinnerCategory.getSelectedItemPosition() == 0) {
+            Toast.makeText(this, "Select a Category", Toast.LENGTH_SHORT).show();
+            isValid = false;
+        }
+
+        if (spinnerIssue.getSelectedItemPosition() == 0) {
+            Toast.makeText(this, "Select an Issue", Toast.LENGTH_SHORT).show();
             isValid = false;
         }
 
@@ -746,7 +752,9 @@ public class submitreport extends AppCompatActivity implements OnMapReadyCallbac
                     reportData.put("contact", documentSnapshot.getString("contact"));
                     reportData.put("userBarangay", documentSnapshot.getString("barangay"));
                     reportData.put("position", documentSnapshot.getString("position"));
-                    reportData.put("description", desc);
+                    reportData.put("category", spinnerCategory.getSelectedItem().toString());
+                    reportData.put("issue", spinnerIssue.getSelectedItem().toString());
+                    reportData.put("description", desc.isEmpty() ? "No description provided" : desc);
                     reportData.put("width", Double.parseDouble(widthStr));
                     reportData.put("height", Double.parseDouble(heightStr));
                     reportData.put("barangay", spinnerBarangay.getSelectedItem().toString());
@@ -812,6 +820,8 @@ public class submitreport extends AppCompatActivity implements OnMapReadyCallbac
         selectedLocation = null;
         selectedLocationText.setText("Tap on map to select location");
         spinnerBarangay.setSelection(0);
+        spinnerCategory.setSelection(0);
+        spinnerIssue.setSelection(0);
     }
 
     @Override

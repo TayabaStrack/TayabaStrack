@@ -94,4 +94,28 @@
         <item>IV</item>
         <item>V</item>
     </string-array>
+
+    <string-array name="infrastructure_categories">
+        <item>Select Category</item>
+        <item>Daan (Road)</item>
+        <item>Poste (Post/Pole)</item>
+        <item>Tulay (Bridge)</item>
+        <item>Ilaw (Street Light)</item>
+        <item>Kanal (Drainage)</item>
+        <item>Bangketa (Sidewalk)</item>
+        <item>Iba Pa (Others)</item>
+    </string-array>
+
+    <!-- Infrastructure Issues -->
+    <string-array name="infrastructure_issues">
+        <item>Select Issue</item>
+        <item>Sira (Broken)</item>
+        <item>Butas (Hole/Pothole)</item>
+        <item>Bitak (Crack)</item>
+        <item>Hindi Gumagana (Not Working)</item>
+        <item>Nawawala (Missing)</item>
+        <item>Nakasara/Bara (Blocked)</item>
+        <item>Delikado (Dangerous)</item>
+        <item>Iba Pa (Others)</item>
+    </string-array>
 </resources>

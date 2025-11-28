@@ -11,6 +11,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class NewPassword extends AppCompatActivity {
@@ -21,38 +23,38 @@ public class NewPassword extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
     private String userEmail;
+    private String userId;
 
     private static final int MIN_PASSWORD_LENGTH = 6;
+    private static final String TAG = "NewPassword";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_password);
+
         android.view.Window window = getWindow();
         window.setStatusBarColor(android.graphics.Color.parseColor("#ffffff"));
         androidx.core.view.WindowInsetsControllerCompat controller =
                 new androidx.core.view.WindowInsetsControllerCompat(window, window.getDecorView());
         controller.setAppearanceLightStatusBars(true);
-        // Initialize Firebase
+
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        // Get email from intent
         Intent intent = getIntent();
         userEmail = intent.getStringExtra("email");
 
-        if (userEmail == null) {
+        if (userEmail == null || userEmail.isEmpty()) {
             Toast.makeText(this, "Error: No email provided", Toast.LENGTH_LONG).show();
             finish();
             return;
         }
 
-        // Initialize views
         newPasswordInput = findViewById(R.id.newPasswordInput);
         confirmPasswordInput = findViewById(R.id.confirmPasswordInput);
         resetPasswordButton = findViewById(R.id.resetPasswordButton);
 
-        // Handle Reset Password button
         resetPasswordButton.setOnClickListener(v -> resetPassword());
     }
 
@@ -60,7 +62,6 @@ public class NewPassword extends AppCompatActivity {
         String newPassword = newPasswordInput.getText().toString().trim();
         String confirmPassword = confirmPasswordInput.getText().toString().trim();
 
-        // Validate inputs
         if (TextUtils.isEmpty(newPassword)) {
             newPasswordInput.setError("Password is required");
             newPasswordInput.requestFocus();
@@ -73,74 +74,160 @@ public class NewPassword extends AppCompatActivity {
             return;
         }
 
-        // Validate password length (minimum 6 characters)
         if (newPassword.length() < MIN_PASSWORD_LENGTH) {
             newPasswordInput.setError("Password must be at least 6 characters");
             newPasswordInput.requestFocus();
             return;
         }
 
-        // Check if passwords match
         if (!newPassword.equals(confirmPassword)) {
             Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show();
+            confirmPasswordInput.setError("Passwords do not match");
             confirmPasswordInput.requestFocus();
             return;
         }
 
-        // Disable button
         resetPasswordButton.setEnabled(false);
-        resetPasswordButton.setText("Resetting...");
+        resetPasswordButton.setText("Resetting Password...");
 
-        // Update password
-        updatePassword(newPassword);
+        getUserAndUpdatePassword(newPassword);
     }
 
-    private void updatePassword(String newPassword) {
-        // Get user document from Firestore using email
+    private void getUserAndUpdatePassword(String newPassword) {
         db.collection("users")
                 .whereEqualTo("email", userEmail)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     if (!queryDocumentSnapshots.isEmpty()) {
-                        String userId = queryDocumentSnapshots.getDocuments().get(0).getId();
+                        DocumentSnapshot document = queryDocumentSnapshots.getDocuments().get(0);
+                        userId = document.getId();
+                        String oldPassword = document.getString("password");
 
-                        // Update password in Firestore
-                        db.collection("users").document(userId)
-                                .update("password", newPassword)
-                                .addOnSuccessListener(aVoid -> {
-                                    Toast.makeText(NewPassword.this,
-                                            "Password reset successfully!",
-                                            Toast.LENGTH_LONG).show();
+                        Log.d(TAG, "User found: " + userId);
 
-                                    // Navigate back to login
-                                    Intent intent = new Intent(NewPassword.this, Login.class);
-                                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                    startActivity(intent);
-                                    finish();
-                                })
-                                .addOnFailureListener(e -> {
-                                    Toast.makeText(NewPassword.this,
-                                            "Error updating password: " + e.getMessage(),
-                                            Toast.LENGTH_SHORT).show();
-                                    resetPasswordButton.setEnabled(true);
-                                    resetPasswordButton.setText("Reset Password");
-                                    Log.e("NewPassword", "Error updating password", e);
-                                });
+                        // Sign in with old password to authenticate
+                        signInAndUpdate(oldPassword, newPassword);
+
                     } else {
-                        Toast.makeText(NewPassword.this,
-                                "User not found",
-                                Toast.LENGTH_SHORT).show();
-                        resetPasswordButton.setEnabled(true);
-                        resetPasswordButton.setText("Reset Password");
+                        Toast.makeText(this, "User not found", Toast.LENGTH_SHORT).show();
+                        resetButton();
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(NewPassword.this,
-                            "Error: " + e.getMessage(),
-                            Toast.LENGTH_SHORT).show();
-                    resetPasswordButton.setEnabled(true);
-                    resetPasswordButton.setText("Reset Password");
-                    Log.e("NewPassword", "Error finding user", e);
+                    Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Error getting user", e);
+                    resetButton();
                 });
+    }
+
+    private void signInAndUpdate(String oldPassword, String newPassword) {
+        String authPassword = (oldPassword != null && !oldPassword.isEmpty()) ? oldPassword : "TempPass123456";
+
+        mAuth.signInWithEmailAndPassword(userEmail, authPassword)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Log.d(TAG, "Signed in successfully");
+                        FirebaseUser user = mAuth.getCurrentUser();
+
+                        if (user != null) {
+                            // Update Firebase Auth password
+                            updateAuthPassword(user, newPassword);
+                        } else {
+                            resetButton();
+                        }
+
+                    } else {
+                        Log.e(TAG, "Sign-in failed, creating account", task.getException());
+                        // If sign-in fails, create account with new password
+                        createAccountWithNewPassword(newPassword);
+                    }
+                });
+    }
+
+    private void createAccountWithNewPassword(String newPassword) {
+        mAuth.createUserWithEmailAndPassword(userEmail, newPassword)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Log.d(TAG, "Account created with new password");
+
+                        // Update Firestore
+                        updateFirestorePassword(newPassword);
+
+                    } else {
+                        Log.e(TAG, "Failed to create account", task.getException());
+                        Toast.makeText(this,
+                                "Error: " + task.getException().getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                        resetButton();
+                    }
+                });
+    }
+
+    private void updateAuthPassword(FirebaseUser user, String newPassword) {
+        user.updatePassword(newPassword)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Log.d(TAG, "Firebase Auth password updated");
+
+                        // Update Firestore
+                        updateFirestorePassword(newPassword);
+
+                    } else {
+                        Log.e(TAG, "Failed to update auth password", task.getException());
+                        Toast.makeText(this,
+                                "Error: " + task.getException().getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                        resetButton();
+                    }
+                });
+    }
+
+    private void updateFirestorePassword(String newPassword) {
+        Log.d(TAG, "Updating Firestore password");
+
+        db.collection("users").document(userId)
+                .update("password", newPassword)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "✅ Password updated successfully!");
+
+                    // Mark reset code as used
+                    db.collection("password_reset_codes").document(userEmail)
+                            .update("used", true)
+                            .addOnSuccessListener(v -> Log.d(TAG, "Reset code marked as used"))
+                            .addOnFailureListener(e -> Log.e(TAG, "Error marking code", e));
+
+                    // Sign out
+                    if (mAuth.getCurrentUser() != null) {
+                        mAuth.signOut();
+                    }
+
+                    Toast.makeText(this,
+                            "Password reset successfully! Please login with your new password.",
+                            Toast.LENGTH_LONG).show();
+
+                    // Go to login
+                    Intent intent = new Intent(NewPassword.this, Login.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "❌ Failed to update Firestore password", e);
+                    Toast.makeText(this,
+                            "Error updating password: " + e.getMessage(),
+                            Toast.LENGTH_SHORT).show();
+                    resetButton();
+                });
+    }
+
+    private void resetButton() {
+        resetPasswordButton.setEnabled(true);
+        resetPasswordButton.setText("Reset Password");
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
     }
 }

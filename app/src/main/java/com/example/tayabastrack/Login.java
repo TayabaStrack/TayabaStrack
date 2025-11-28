@@ -3,6 +3,7 @@ package com.example.tayabastrack;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
@@ -32,6 +33,7 @@ public class Login extends AppCompatActivity {
     private static final String PREFS_NAME = "TayabasTrackPrefs";
     private static final String KEY_EMAIL = "saved_email";
     private static final String KEY_REMEMBER = "remember_me";
+    private static final String TAG = "Login";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,11 +119,47 @@ public class Login extends AppCompatActivity {
                         saveEmail(email, rememberMeCheckbox.isChecked());
 
                         String userId = mAuth.getCurrentUser().getUid();
+
+                        // ✅ Sync Firestore password with Firebase Auth password
+                        updateFirestorePasswordIfNeeded(userId, password);
+
+                        // Continue with normal login flow
                         checkUserStatus(userId);
                     } else {
                         Toast.makeText(Login.this, "Login Failed: " +
                                 task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                     }
+                });
+    }
+
+    // ✅ NEW METHOD: Sync Firestore password with Firebase Auth password
+    private void updateFirestorePasswordIfNeeded(String userId, String password) {
+        firestore.collection("users").document(userId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        String firestorePassword = documentSnapshot.getString("password");
+
+                        // If passwords don't match, update Firestore
+                        if (firestorePassword != null && !firestorePassword.equals(password)) {
+                            Log.d(TAG, "Passwords don't match - updating Firestore password");
+
+                            firestore.collection("users").document(userId)
+                                    .update("password", password)
+                                    .addOnSuccessListener(aVoid -> {
+                                        Log.d(TAG, "Firestore password synced with Firebase Auth");
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Log.e(TAG, "Failed to sync Firestore password", e);
+                                    });
+                        } else {
+                            Log.d(TAG, "Passwords already match - no update needed");
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error getting user document for password sync", e);
+                    // Don't block login if sync fails
                 });
     }
 

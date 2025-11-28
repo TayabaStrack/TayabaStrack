@@ -72,12 +72,74 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Description - REQUIRED -->
+            <!-- Category Dropdown - REQUIRED -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Category: *"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp"
+                android:textColor="#000"/>
+
+            <FrameLayout
+                android:id="@+id/categoryContainer"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/image_border_outline"
+                android:clickable="true"
+                android:focusable="true">
+
+                <!-- Category Dropdown - REQUIRED -->
+                <Spinner
+                    android:id="@+id/spinnerCategory"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:spinnerMode="dropdown"
+                    android:entries="@array/infrastructure_categories"
+                    android:padding="12dp"
+                    android:popupBackground="@color/white"
+                    android:theme="@android:style/ThemeOverlay.Material.Light"
+                    android:background="@android:color/transparent" />
+            </FrameLayout>
+
+            <!-- Issue Dropdown - REQUIRED -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Issue: *"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp"
+                android:textColor="#000"/>
+
+            <FrameLayout
+                android:id="@+id/issueContainer"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/image_border_outline"
+                android:clickable="true"
+                android:focusable="true">
+
+                <!-- Issue Dropdown - REQUIRED -->
+                <Spinner
+                    android:id="@+id/spinnerIssue"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:spinnerMode="dropdown"
+                    android:entries="@array/infrastructure_issues"
+                    android:padding="12dp"
+                    android:popupBackground="@color/white"
+                    android:theme="@android:style/ThemeOverlay.Material.Light"
+                    android:background="@android:color/transparent" />
+            </FrameLayout>
+
+            <!-- Description - OPTIONAL -->
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
-                android:layout_height="67dp"
+                android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
-                android:hint="Description *"
+                android:hint="Description (Optional)"
                 app:boxStrokeColor="#004aad"
                 app:boxStrokeWidth="2dp"
                 app:boxStrokeWidthFocused="3dp"
@@ -93,8 +155,7 @@
                     android:textCursorDrawable="@null" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Upload Image - REQUIRED (FrameLayout Style) -->
-            <!-- Upload Image - REQUIRED (FrameLayout Style) -->
+            <!-- Upload Image - REQUIRED -->
             <FrameLayout
                 android:id="@+id/btnUpload"
                 android:layout_width="match_parent"
@@ -120,6 +181,7 @@
                     android:scaleType="centerCrop"
                     android:visibility="gone" />
             </FrameLayout>
+
             <!-- Measurements - REQUIRED -->
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
@@ -193,7 +255,7 @@
 
                 </androidx.cardview.widget.CardView>
 
-                <!-- Search Bar Overlay (positioned at top) -->
+                <!-- Search Bar Overlay -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
@@ -327,7 +389,8 @@
                 android:layout_marginTop="16dp"/>
         </LinearLayout>
     </ScrollView>
-    <!-- Bottom Navigation Bar - Custom ImageButtons -->
+
+    <!-- Bottom Navigation Bar -->
     <LinearLayout
         android:id="@+id/bottom_navigation"
         android:layout_width="0dp"
