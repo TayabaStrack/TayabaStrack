@@ -168,7 +168,7 @@
                     android:cursorVisible="false"
                     android:longClickable="false" />
 
-                <!-- Email -->
+                <!-- Email (Read-only) -->
                 <EditText
                     android:id="@+id/etEmail"
                     android:layout_width="match_parent"
@@ -177,7 +177,7 @@
                     android:padding="16dp"
                     android:background="@drawable/edit_text_border"
                     android:textSize="16sp"
-                    android:textColor="@android:color/black"
+                    android:textColor="#666666"
                     android:textColorHint="#004AAD"
                     android:inputType="textEmailAddress"
                     android:layout_marginBottom="12dp"
@@ -186,7 +186,7 @@
                     android:cursorVisible="false"
                     android:longClickable="false" />
 
-                <!-- Position -->
+                <!-- Position (Read-only) -->
                 <EditText
                     android:id="@+id/etPosition"
                     android:layout_width="match_parent"
@@ -195,7 +195,7 @@
                     android:padding="16dp"
                     android:background="@drawable/edit_text_border"
                     android:textSize="16sp"
-                    android:textColor="@android:color/black"
+                    android:textColor="#666666"
                     android:textColorHint="#004AAD"
                     android:inputType="text"
                     android:layout_marginBottom="12dp"
@@ -222,37 +222,69 @@
                     android:cursorVisible="false"
                     android:longClickable="false" />
 
-                <!-- Barangay -->
-                <EditText
-                    android:id="@+id/etBarangay"
+                <!-- Barangay Dropdown -->
+                <Spinner
+                    android:id="@+id/spinnerBarangay"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
-                    android:hint="Barangay"
                     android:padding="16dp"
                     android:background="@drawable/edit_text_border"
-                    android:textSize="16sp"
-                    android:textColor="@android:color/black"
-                    android:textColorHint="#004AAD"
-                    android:inputType="text"
                     android:layout_marginBottom="24dp"
-                    android:focusable="false"
-                    android:clickable="false"
-                    android:cursorVisible="false"
-                    android:longClickable="false" />
+                    android:entries="@array/tayabas_barangays"
+                    android:enabled="false"
+                    android:spinnerMode="dropdown" />
 
-                <!-- Log out Button -->
+                <!-- Edit Profile Button (Initially Visible) -->
                 <Button
-                    android:id="@+id/btnLogout"
+                    android:id="@+id/btnEditProfile"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
-                    android:text="Log out"
+                    android:text="Edit Profile"
                     android:textColor="@android:color/white"
                     android:textSize="16sp"
                     android:textStyle="bold"
-                    android:backgroundTint="#004AAD" />
+                    android:backgroundTint="#004AAD"
+                    android:visibility="visible" />
+
+                <!-- Buttons Layout (Initially Hidden) -->
+                <LinearLayout
+                    android:id="@+id/buttonLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:weightSum="2"
+                    android:visibility="gone">
+
+                    <!-- Cancel Button -->
+                    <Button
+                        android:id="@+id/btnCancel"
+                        android:layout_width="0dp"
+                        android:layout_height="56dp"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="8dp"
+                        android:text="Cancel"
+                        android:textColor="@android:color/white"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:backgroundTint="#757575" />
+
+                    <!-- Save Changes Button -->
+                    <Button
+                        android:id="@+id/btnSaveChanges"
+                        android:layout_width="0dp"
+                        android:layout_height="56dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="Save Changes"
+                        android:textColor="@android:color/white"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:backgroundTint="#004AAD" />
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
     </ScrollView>
+
     <!-- Bottom Navigation Bar - Custom ImageButtons -->
     <LinearLayout
         android:id="@+id/bottom_navigation"

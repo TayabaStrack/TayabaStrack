@@ -6,9 +6,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,18 +28,29 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class myaccount extends AppCompatActivity {
 
     private TextView fullNameText, positionText;
-    private EditText etFirstName, etMiddleName, etSurname, etEmail, etPosition, etPhoneNumber, etBarangay;
-    private Button btnLogout;
+    private EditText etFirstName, etMiddleName, etSurname, etEmail, etPosition, etPhoneNumber;
+    private Spinner spinnerBarangay;
+    private Button btnEditProfile, btnCancel, btnSaveChanges;
+    private LinearLayout buttonLayout;
     private ImageButton backButton;
 
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
     private String userId;
 
+    private boolean isEditMode = false;
 
+    // Store original values for cancel functionality
+    private String originalFirstName, originalMiddleName, originalSurname;
+    private String originalPhoneNumber, originalBarangay;
+
+    private String[] barangayList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,14 +64,11 @@ public class myaccount extends AppCompatActivity {
         WindowInsetsControllerCompat controller = new WindowInsetsControllerCompat(window, window.getDecorView());
         controller.setAppearanceLightStatusBars(true);
 
-
-
         View mainView = findViewById(R.id.main);
         ViewCompat.setOnApplyWindowInsetsListener(mainView, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             Insets ime = insets.getInsets(WindowInsetsCompat.Type.ime());
 
-            // Apply system bars padding (status bar, navigation bar)
             v.setPadding(
                     systemBars.left,
                     systemBars.top,
@@ -81,7 +92,6 @@ public class myaccount extends AppCompatActivity {
             userId = currentUser.getUid();
             loadUserData();
         } else {
-            // User not logged in, redirect to login
             Toast.makeText(this, "Please log in first", Toast.LENGTH_SHORT).show();
             startActivity(new Intent(myaccount.this, Login.class));
             finish();
@@ -90,42 +100,7 @@ public class myaccount extends AppCompatActivity {
 
         // Setup event listeners
         setupEventListeners();
-        ImageButton btnNavHome = findViewById(R.id.nav_home);
-        ImageButton btnNavContacts = findViewById(R.id.nav_contacts);
-        ImageButton btnNavSubmit = findViewById(R.id.nav_submit);
-        ImageButton btnNavHistory = findViewById(R.id.nav_history);
-        ImageButton btnNavProfile = findViewById(R.id.nav_profile);
-
-        // Set click listeners for navigation
-        btnNavHome.setOnClickListener(v -> {
-            startActivity(new Intent(this, dashboard.class));
-            finish();
-        });
-
-        btnNavProfile.setOnClickListener(v -> {
-            // Already on contacts page, optionally show a toast or do nothing
-            Toast.makeText(this, "Already on Profile", Toast.LENGTH_SHORT).show();
-        });
-
-        btnNavSubmit.setOnClickListener(v -> {
-            startActivity(new Intent(this, submitreport.class));
-            finish();
-        });
-
-        btnNavContacts.setOnClickListener(v -> {
-            startActivity(new Intent(this, contacts.class));
-            finish();
-        });
-
-        btnNavHistory.setOnClickListener(v -> {
-            startActivity(new Intent(this, myreports.class));
-            finish();
-        });
-
-        btnNavProfile.setOnClickListener(v -> {
-            startActivity(new Intent(this, myaccount.class));
-            finish();
-        });
+        setupNavigationListeners();
     }
 
     private void initializeViews() {
@@ -137,29 +112,34 @@ public class myaccount extends AppCompatActivity {
         etEmail = findViewById(R.id.etEmail);
         etPosition = findViewById(R.id.etPosition);
         etPhoneNumber = findViewById(R.id.etPhoneNumber);
-        etBarangay = findViewById(R.id.etBarangay);
-        btnLogout = findViewById(R.id.btnLogout);
+        spinnerBarangay = findViewById(R.id.spinnerBarangay);
+        btnEditProfile = findViewById(R.id.btnEditProfile);
+        btnCancel = findViewById(R.id.btnCancel);
+        btnSaveChanges = findViewById(R.id.btnSaveChanges);
+        buttonLayout = findViewById(R.id.buttonLayout);
         backButton = findViewById(R.id.backButton);
+
+        // Get barangay list from resources
+        barangayList = getResources().getStringArray(R.array.tayabas_barangays);
+
+        // Spinner is already populated via XML with android:entries
+        spinnerBarangay.setEnabled(false);
     }
 
     private void loadUserData() {
-        // Show loading state
         fullNameText.setText("Loading...");
         positionText.setText("");
 
-        // Get current user for email
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null && currentUser.getEmail() != null) {
             etEmail.setText(currentUser.getEmail());
         }
 
-        // Fetch user data from Firestore
         db.collection("users")
                 .document(userId)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
-                        // Get user data
                         String firstName = documentSnapshot.getString("firstName");
                         String middleName = documentSnapshot.getString("middleName");
                         String surname = documentSnapshot.getString("surname");
@@ -168,19 +148,34 @@ public class myaccount extends AppCompatActivity {
                         String barangay = documentSnapshot.getString("barangay");
                         String fullName = documentSnapshot.getString("fullName");
 
+                        // Store original values
+                        originalFirstName = firstName != null ? firstName : "";
+                        originalMiddleName = middleName != null ? middleName : "";
+                        originalSurname = surname != null ? surname : "";
+                        originalPhoneNumber = phoneNumber != null ? phoneNumber : "";
+                        originalBarangay = barangay != null ? barangay : "";
+
                         // Update EditTexts
                         if (firstName != null) etFirstName.setText(firstName);
                         if (middleName != null) etMiddleName.setText(middleName);
                         if (surname != null) etSurname.setText(surname);
                         if (position != null) etPosition.setText(position);
                         if (phoneNumber != null) etPhoneNumber.setText(phoneNumber);
-                        if (barangay != null) etBarangay.setText(barangay);
+
+                        // Set barangay spinner
+                        if (barangay != null && !barangay.isEmpty()) {
+                            for (int i = 0; i < barangayList.length; i++) {
+                                if (barangayList[i].equals(barangay)) {
+                                    spinnerBarangay.setSelection(i);
+                                    break;
+                                }
+                            }
+                        }
 
                         // Update header display
                         if (fullName != null && !fullName.isEmpty()) {
                             fullNameText.setText(fullName);
                         } else {
-                            // Build full name from components
                             String displayName = buildFullName(firstName, middleName, surname);
                             fullNameText.setText(displayName.isEmpty() ? "No name available" : displayName);
                         }
@@ -224,68 +219,271 @@ public class myaccount extends AppCompatActivity {
     }
 
     private void setupEventListeners() {
-        // Back button
         backButton.setOnClickListener(v -> {
-            startActivity(new Intent(myaccount.this, dashboard.class));
-            finish();
+            if (isEditMode) {
+                showDiscardChangesDialog();
+            } else {
+                startActivity(new Intent(myaccount.this, dashboard.class));
+                finish();
+            }
         });
 
-        // Logout button
-        btnLogout.setOnClickListener(v -> showLogoutDialog());
+        btnEditProfile.setOnClickListener(v -> enableEditMode());
+
+        btnCancel.setOnClickListener(v -> showCancelDialog());
+
+        btnSaveChanges.setOnClickListener(v -> saveChanges());
     }
 
-    private void showLogoutDialog() {
-        androidx.appcompat.app.AlertDialog dialog = new androidx.appcompat.app.AlertDialog.Builder(this)
-                .setMessage("Do you want to log out?")
-                .setPositiveButton("Yes", (d, w) -> {
-                    // Sign out from Firebase
-                    mAuth.signOut();
-                    Log.d(TAG, "User logged out");
+    private void setupNavigationListeners() {
+        ImageButton btnNavHome = findViewById(R.id.nav_home);
+        ImageButton btnNavContacts = findViewById(R.id.nav_contacts);
+        ImageButton btnNavSubmit = findViewById(R.id.nav_submit);
+        ImageButton btnNavHistory = findViewById(R.id.nav_history);
+        ImageButton btnNavProfile = findViewById(R.id.nav_profile);
 
-                    Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show();
+        btnNavHome.setOnClickListener(v -> {
+            if (isEditMode) {
+                showDiscardChangesDialog();
+            } else {
+                startActivity(new Intent(this, dashboard.class));
+                finish();
+            }
+        });
 
-                    // Navigate to Login and clear activity stack
-                    Intent intent = new Intent(this, Login.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                    finish();
+        btnNavProfile.setOnClickListener(v -> {
+            Toast.makeText(this, "Already on Profile", Toast.LENGTH_SHORT).show();
+        });
+
+        btnNavSubmit.setOnClickListener(v -> {
+            if (isEditMode) {
+                showDiscardChangesDialog();
+            } else {
+                startActivity(new Intent(this, submitreport.class));
+                finish();
+            }
+        });
+
+        btnNavContacts.setOnClickListener(v -> {
+            if (isEditMode) {
+                showDiscardChangesDialog();
+            } else {
+                startActivity(new Intent(this, contacts.class));
+                finish();
+            }
+        });
+
+        btnNavHistory.setOnClickListener(v -> {
+            if (isEditMode) {
+                showDiscardChangesDialog();
+            } else {
+                startActivity(new Intent(this, myreports.class));
+                finish();
+            }
+        });
+    }
+
+    private void enableEditMode() {
+        isEditMode = true;
+
+        // Enable editing for editable fields
+        setFieldEditable(etFirstName, true);
+        setFieldEditable(etMiddleName, true);
+        setFieldEditable(etSurname, true);
+        setFieldEditable(etPhoneNumber, true);
+
+        // Enable spinner
+        spinnerBarangay.setEnabled(true);
+
+        // Show Cancel and Save buttons, hide Edit Profile button
+        btnEditProfile.setVisibility(View.GONE);
+        buttonLayout.setVisibility(View.VISIBLE);
+
+        Toast.makeText(this, "Edit mode enabled", Toast.LENGTH_SHORT).show();
+    }
+
+    private void disableEditMode() {
+        isEditMode = false;
+
+        // Disable editing
+        setFieldEditable(etFirstName, false);
+        setFieldEditable(etMiddleName, false);
+        setFieldEditable(etSurname, false);
+        setFieldEditable(etPhoneNumber, false);
+
+        // Disable spinner
+        spinnerBarangay.setEnabled(false);
+
+        // Show Edit Profile button, hide Cancel and Save buttons
+        btnEditProfile.setVisibility(View.VISIBLE);
+        buttonLayout.setVisibility(View.GONE);
+    }
+
+    private void setFieldEditable(EditText editText, boolean editable) {
+        editText.setFocusable(editable);
+        editText.setFocusableInTouchMode(editable);
+        editText.setClickable(editable);
+        editText.setCursorVisible(editable);
+        editText.setLongClickable(editable);
+    }
+
+    private void showDiscardChangesDialog() {
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setMessage("You have unsaved changes. Discard them?")
+                .setPositiveButton("Discard", (d, w) -> {
+                    restoreOriginalValues();
+                    disableEditMode();
                 })
-                .setNegativeButton("No", (d, w) -> d.dismiss())
+                .setNegativeButton("Keep Editing", (d, w) -> d.dismiss())
                 .create();
 
         dialog.setOnShowListener(d -> {
-            // Set background to #004AAD and text/buttons to white
             dialog.getWindow().setBackgroundDrawableResource(R.color.blue_004aad);
-
             int white = ContextCompat.getColor(this, android.R.color.white);
 
             TextView message = dialog.findViewById(android.R.id.message);
             if (message != null) message.setTextColor(white);
 
-            dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).setTextColor(white);
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(white);
             dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(white);
         });
 
         dialog.show();
     }
 
-    private void logout() {
-        // Sign out from Firebase
-        mAuth.signOut();
+    private void showCancelDialog() {
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setMessage("Discard changes?")
+                .setPositiveButton("Yes", (d, w) -> {
+                    restoreOriginalValues();
+                    disableEditMode();
+                    Toast.makeText(this, "Changes discarded", Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton("No", (d, w) -> d.dismiss())
+                .create();
 
-        Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show();
+        dialog.setOnShowListener(d -> {
+            dialog.getWindow().setBackgroundDrawableResource(R.color.blue_004aad);
+            int white = ContextCompat.getColor(this, android.R.color.white);
 
-        // Redirect to login
-        Intent intent = new Intent(myaccount.this, Login.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        finish();
+            TextView message = dialog.findViewById(android.R.id.message);
+            if (message != null) message.setTextColor(white);
+
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(white);
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(white);
+        });
+
+        dialog.show();
+    }
+
+    private void restoreOriginalValues() {
+        etFirstName.setText(originalFirstName);
+        etMiddleName.setText(originalMiddleName);
+        etSurname.setText(originalSurname);
+        etPhoneNumber.setText(originalPhoneNumber);
+
+        // Restore barangay spinner
+        if (originalBarangay != null && !originalBarangay.isEmpty()) {
+            for (int i = 0; i < barangayList.length; i++) {
+                if (barangayList[i].equals(originalBarangay)) {
+                    spinnerBarangay.setSelection(i);
+                    break;
+                }
+            }
+        } else {
+            spinnerBarangay.setSelection(0);
+        }
+    }
+
+    private void saveChanges() {
+        // Get updated values
+        String firstName = etFirstName.getText().toString().trim();
+        String middleName = etMiddleName.getText().toString().trim();
+        String surname = etSurname.getText().toString().trim();
+        String phoneNumber = etPhoneNumber.getText().toString().trim();
+        String barangay = spinnerBarangay.getSelectedItem().toString();
+
+        // Validate required fields
+        if (firstName.isEmpty()) {
+            etFirstName.setError("First name is required");
+            etFirstName.requestFocus();
+            return;
+        }
+
+        if (surname.isEmpty()) {
+            etSurname.setError("Surname is required");
+            etSurname.requestFocus();
+            return;
+        }
+
+        // Validate barangay selection
+        if (barangay.equals("Select Barangay")) {
+            Toast.makeText(this, "Please select a barangay", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Build full name
+        String fullName = buildFullName(firstName, middleName, surname);
+
+        // Create update map
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("firstName", firstName);
+        updates.put("middleName", middleName);
+        updates.put("surname", surname);
+        updates.put("fullName", fullName);
+        updates.put("phoneNumber", phoneNumber);
+        updates.put("barangay", barangay);
+
+        // Show loading state
+        btnSaveChanges.setEnabled(false);
+        btnSaveChanges.setText("Saving...");
+
+        // Update Firestore
+        db.collection("users")
+                .document(userId)
+                .update(updates)
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(this, "Profile updated successfully", Toast.LENGTH_SHORT).show();
+
+                    // Update original values
+                    originalFirstName = firstName;
+                    originalMiddleName = middleName;
+                    originalSurname = surname;
+                    originalPhoneNumber = phoneNumber;
+                    originalBarangay = barangay;
+
+                    // Update header display
+                    fullNameText.setText(fullName);
+
+                    // Reset button
+                    btnSaveChanges.setEnabled(true);
+                    btnSaveChanges.setText("Save Changes");
+
+                    // Disable edit mode
+                    disableEditMode();
+
+                    Log.d("MyAccount", "Profile updated successfully");
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Failed to update profile: " + e.getMessage(),
+                            Toast.LENGTH_SHORT).show();
+
+                    // Reset button
+                    btnSaveChanges.setEnabled(true);
+                    btnSaveChanges.setText("Save Changes");
+
+                    Log.e("MyAccount", "Error updating profile", e);
+                });
     }
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        startActivity(new Intent(myaccount.this, dashboard.class));
-        finish();
+        if (isEditMode) {
+            showDiscardChangesDialog();
+        } else {
+            startActivity(new Intent(myaccount.this, dashboard.class));
+            finish();
+        }
     }
 }
