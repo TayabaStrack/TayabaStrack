@@ -207,10 +207,21 @@ public class myreports extends AppCompatActivity {
         cardView.setLayoutParams(cardParams);
 
         LinearLayout cardContent = new LinearLayout(this);
-        cardContent.setOrientation(LinearLayout.HORIZONTAL);
+        cardContent.setOrientation(LinearLayout.VERTICAL);
         cardContent.setPadding(16, 16, 16, 16);
         cardContent.setBackgroundColor(0xFFFFFFFF); // White background
         cardView.addView(cardContent);
+
+        // Top section - Description and Barangay with Image
+        LinearLayout topSection = new LinearLayout(this);
+        topSection.setOrientation(LinearLayout.HORIZONTAL);
+        LinearLayout.LayoutParams topParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        topParams.setMargins(0, 0, 0, 16);
+        topSection.setLayoutParams(topParams);
+        cardContent.addView(topSection);
 
         // Left side - Description and Barangay Container
         LinearLayout leftContainer = new LinearLayout(this);
@@ -221,7 +232,7 @@ public class myreports extends AppCompatActivity {
                 0.65f
         );
         leftContainer.setLayoutParams(leftParams);
-        cardContent.addView(leftContainer);
+        topSection.addView(leftContainer);
 
         // Description Section
         TextView descriptionLabel = new TextView(this);
@@ -279,7 +290,7 @@ public class myreports extends AppCompatActivity {
                 0.35f
         );
         imageContainer.setLayoutParams(imageContainerParams);
-        cardContent.addView(imageContainer);
+        topSection.addView(imageContainer);
 
         ImageView reportImage = new ImageView(this);
         reportImage.setScaleType(ImageView.ScaleType.CENTER_CROP);
@@ -310,6 +321,47 @@ public class myreports extends AppCompatActivity {
         }
 
         imageContainer.addView(reportImage);
+
+        // Inspection Date Section (NEW - Added from ongoing.java)
+        if (reportData.containsKey("inspectionDate") && reportData.get("inspectionDate") != null) {
+            TextView inspectionLabel = new TextView(this);
+            inspectionLabel.setText("Inspection Date:");
+            inspectionLabel.setTextSize(15);
+            inspectionLabel.setTypeface(null, android.graphics.Typeface.BOLD);
+            inspectionLabel.setTextColor(0xFF004AAD);
+            LinearLayout.LayoutParams inspectionLabelParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            inspectionLabelParams.setMargins(0, 16, 0, 4);
+            inspectionLabel.setLayoutParams(inspectionLabelParams);
+            cardContent.addView(inspectionLabel);
+
+            TextView inspectionText = new TextView(this);
+            Object dateObj = reportData.get("inspectionDate");
+
+            // Handle both Timestamp objects and String values
+            String dateString;
+            if (dateObj instanceof com.google.firebase.Timestamp) {
+                com.google.firebase.Timestamp timestamp = (com.google.firebase.Timestamp) dateObj;
+                dateString = new java.text.SimpleDateFormat("MMMM d, yyyy", java.util.Locale.US)
+                        .format(timestamp.toDate());
+            } else {
+                dateString = dateObj.toString();
+            }
+
+            inspectionText.setText(dateString);
+            inspectionText.setTextSize(14);
+            inspectionText.setTypeface(null, android.graphics.Typeface.BOLD);
+            inspectionText.setTextColor(0xFF333333);
+            LinearLayout.LayoutParams inspectionParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            inspectionParams.setMargins(0, 0, 0, 12);
+            inspectionText.setLayoutParams(inspectionParams);
+            cardContent.addView(inspectionText);
+        }
 
         return cardView;
     }
