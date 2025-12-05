@@ -214,6 +214,14 @@ public class declined extends AppCompatActivity {
         leftContainer.setLayoutParams(leftParams);
         cardContent.addView(leftContainer);
 
+        addInfoSection(leftContainer, "Category:",
+                reportData.get("category") != null ? reportData.get("category").toString() : "No category",
+                false);
+
+// Issue Section
+        addInfoSection(leftContainer, "Issue:",
+                reportData.get("issue") != null ? reportData.get("issue").toString() : "No issue",
+                false);
         // Description Section
         addInfoSection(leftContainer, "Description:",
                 reportData.get("description") != null ? reportData.get("description").toString() : "No description",

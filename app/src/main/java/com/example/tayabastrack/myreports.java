@@ -234,6 +234,63 @@ public class myreports extends AppCompatActivity {
         leftContainer.setLayoutParams(leftParams);
         topSection.addView(leftContainer);
 
+        TextView categoryLabel = new TextView(this);
+        categoryLabel.setText("Category:");
+        categoryLabel.setTextSize(15);
+        categoryLabel.setTypeface(null, android.graphics.Typeface.BOLD);
+        categoryLabel.setTextColor(0xFF004AAD);
+        LinearLayout.LayoutParams categoryLabelParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        categoryLabelParams.setMargins(0, 12, 0, 4);
+        categoryLabel.setLayoutParams(categoryLabelParams);
+        leftContainer.addView(categoryLabel);
+
+        TextView categoryText = new TextView(this);
+        String category = reportData.get("category") != null ?
+                reportData.get("category").toString() : "No category";
+        categoryText.setText(category);
+        categoryText.setTextSize(14);
+        categoryText.setTypeface(null, android.graphics.Typeface.BOLD);
+        categoryText.setTextColor(0xFF333333);
+        LinearLayout.LayoutParams categoryParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        categoryParams.setMargins(0, 0, 0, 0);
+        categoryText.setLayoutParams(categoryParams);
+        leftContainer.addView(categoryText);
+
+// Issue Section
+        TextView issueLabel = new TextView(this);
+        issueLabel.setText("Issue:");
+        issueLabel.setTextSize(15);
+        issueLabel.setTypeface(null, android.graphics.Typeface.BOLD);
+        issueLabel.setTextColor(0xFF004AAD);
+        LinearLayout.LayoutParams issueLabelParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        issueLabelParams.setMargins(0, 12, 0, 4);
+        issueLabel.setLayoutParams(issueLabelParams);
+        leftContainer.addView(issueLabel);
+
+        TextView issueText = new TextView(this);
+        String issue = reportData.get("issue") != null ?
+                reportData.get("issue").toString() : "No issue";
+        issueText.setText(issue);
+        issueText.setTextSize(14);
+        issueText.setTypeface(null, android.graphics.Typeface.BOLD);
+        issueText.setTextColor(0xFF333333);
+        LinearLayout.LayoutParams issueParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        issueParams.setMargins(0, 0, 0, 0);
+        issueText.setLayoutParams(issueParams);
+        leftContainer.addView(issueText);
+
         // Description Section
         TextView descriptionLabel = new TextView(this);
         descriptionLabel.setText("Description:");
