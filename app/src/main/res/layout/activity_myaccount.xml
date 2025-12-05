@@ -186,23 +186,17 @@
                     android:cursorVisible="false"
                     android:longClickable="false" />
 
-                <!-- Position (Read-only) -->
-                <EditText
-                    android:id="@+id/etPosition"
+                <!-- Position Dropdown -->
+                <Spinner
+                    android:id="@+id/spinnerPosition"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
-                    android:hint="Position"
                     android:padding="16dp"
                     android:background="@drawable/edit_text_border"
-                    android:textSize="16sp"
-                    android:textColor="#666666"
-                    android:textColorHint="#004AAD"
-                    android:inputType="text"
                     android:layout_marginBottom="12dp"
-                    android:focusable="false"
-                    android:clickable="false"
-                    android:cursorVisible="false"
-                    android:longClickable="false" />
+                    android:entries="@array/barangay_positions"
+                    android:enabled="false"
+                    android:spinnerMode="dropdown" />
 
                 <!-- Phone Number -->
                 <EditText

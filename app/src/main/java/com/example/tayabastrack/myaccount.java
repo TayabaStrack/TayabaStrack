@@ -34,8 +34,8 @@ import java.util.Map;
 public class myaccount extends AppCompatActivity {
 
     private TextView fullNameText, positionText;
-    private EditText etFirstName, etMiddleName, etSurname, etEmail, etPosition, etPhoneNumber;
-    private Spinner spinnerBarangay;
+    private EditText etFirstName, etMiddleName, etSurname, etEmail, etPhoneNumber;
+    private Spinner spinnerBarangay, spinnerPosition;
     private Button btnEditProfile, btnCancel, btnSaveChanges;
     private LinearLayout buttonLayout;
     private ImageButton backButton;
@@ -48,9 +48,10 @@ public class myaccount extends AppCompatActivity {
 
     // Store original values for cancel functionality
     private String originalFirstName, originalMiddleName, originalSurname;
-    private String originalPhoneNumber, originalBarangay;
+    private String originalPhoneNumber, originalBarangay, originalPosition;
 
     private String[] barangayList;
+    private String[] positionList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,20 +111,22 @@ public class myaccount extends AppCompatActivity {
         etMiddleName = findViewById(R.id.etMiddleName);
         etSurname = findViewById(R.id.etSurname);
         etEmail = findViewById(R.id.etEmail);
-        etPosition = findViewById(R.id.etPosition);
         etPhoneNumber = findViewById(R.id.etPhoneNumber);
         spinnerBarangay = findViewById(R.id.spinnerBarangay);
+        spinnerPosition = findViewById(R.id.spinnerPosition);
         btnEditProfile = findViewById(R.id.btnEditProfile);
         btnCancel = findViewById(R.id.btnCancel);
         btnSaveChanges = findViewById(R.id.btnSaveChanges);
         buttonLayout = findViewById(R.id.buttonLayout);
         backButton = findViewById(R.id.backButton);
 
-        // Get barangay list from resources
+        // Get barangay and position lists from resources
         barangayList = getResources().getStringArray(R.array.tayabas_barangays);
+        positionList = getResources().getStringArray(R.array.barangay_positions);
 
-        // Spinner is already populated via XML with android:entries
+        // Spinners are already populated via XML with android:entries
         spinnerBarangay.setEnabled(false);
+        spinnerPosition.setEnabled(false);
     }
 
     private void loadUserData() {
@@ -154,13 +157,23 @@ public class myaccount extends AppCompatActivity {
                         originalSurname = surname != null ? surname : "";
                         originalPhoneNumber = phoneNumber != null ? phoneNumber : "";
                         originalBarangay = barangay != null ? barangay : "";
+                        originalPosition = position != null ? position : "";
 
                         // Update EditTexts
                         if (firstName != null) etFirstName.setText(firstName);
                         if (middleName != null) etMiddleName.setText(middleName);
                         if (surname != null) etSurname.setText(surname);
-                        if (position != null) etPosition.setText(position);
                         if (phoneNumber != null) etPhoneNumber.setText(phoneNumber);
+
+                        // Set position spinner
+                        if (position != null && !position.isEmpty()) {
+                            for (int i = 0; i < positionList.length; i++) {
+                                if (positionList[i].equals(position)) {
+                                    spinnerPosition.setSelection(i);
+                                    break;
+                                }
+                            }
+                        }
 
                         // Set barangay spinner
                         if (barangay != null && !barangay.isEmpty()) {
@@ -292,8 +305,9 @@ public class myaccount extends AppCompatActivity {
         setFieldEditable(etSurname, true);
         setFieldEditable(etPhoneNumber, true);
 
-        // Enable spinner
+        // Enable spinners
         spinnerBarangay.setEnabled(true);
+        spinnerPosition.setEnabled(true);
 
         // Show Cancel and Save buttons, hide Edit Profile button
         btnEditProfile.setVisibility(View.GONE);
@@ -311,8 +325,9 @@ public class myaccount extends AppCompatActivity {
         setFieldEditable(etSurname, false);
         setFieldEditable(etPhoneNumber, false);
 
-        // Disable spinner
+        // Disable spinners
         spinnerBarangay.setEnabled(false);
+        spinnerPosition.setEnabled(false);
 
         // Show Edit Profile button, hide Cancel and Save buttons
         btnEditProfile.setVisibility(View.VISIBLE);
@@ -382,6 +397,18 @@ public class myaccount extends AppCompatActivity {
         etSurname.setText(originalSurname);
         etPhoneNumber.setText(originalPhoneNumber);
 
+        // Restore position spinner
+        if (originalPosition != null && !originalPosition.isEmpty()) {
+            for (int i = 0; i < positionList.length; i++) {
+                if (positionList[i].equals(originalPosition)) {
+                    spinnerPosition.setSelection(i);
+                    break;
+                }
+            }
+        } else {
+            spinnerPosition.setSelection(0);
+        }
+
         // Restore barangay spinner
         if (originalBarangay != null && !originalBarangay.isEmpty()) {
             for (int i = 0; i < barangayList.length; i++) {
@@ -401,6 +428,7 @@ public class myaccount extends AppCompatActivity {
         String middleName = etMiddleName.getText().toString().trim();
         String surname = etSurname.getText().toString().trim();
         String phoneNumber = etPhoneNumber.getText().toString().trim();
+        String position = spinnerPosition.getSelectedItem().toString();
         String barangay = spinnerBarangay.getSelectedItem().toString();
 
         // Validate required fields
@@ -413,6 +441,12 @@ public class myaccount extends AppCompatActivity {
         if (surname.isEmpty()) {
             etSurname.setError("Surname is required");
             etSurname.requestFocus();
+            return;
+        }
+
+        // Validate position selection
+        if (position.equals("Select Position")) {
+            Toast.makeText(this, "Please select a position", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -432,6 +466,7 @@ public class myaccount extends AppCompatActivity {
         updates.put("surname", surname);
         updates.put("fullName", fullName);
         updates.put("phoneNumber", phoneNumber);
+        updates.put("position", position);
         updates.put("barangay", barangay);
 
         // Show loading state
@@ -450,10 +485,12 @@ public class myaccount extends AppCompatActivity {
                     originalMiddleName = middleName;
                     originalSurname = surname;
                     originalPhoneNumber = phoneNumber;
+                    originalPosition = position;
                     originalBarangay = barangay;
 
                     // Update header display
                     fullNameText.setText(fullName);
+                    positionText.setText(position);
 
                     // Reset button
                     btnSaveChanges.setEnabled(true);
