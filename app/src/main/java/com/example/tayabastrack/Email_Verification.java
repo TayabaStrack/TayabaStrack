@@ -109,10 +109,10 @@ public class Email_Verification extends AppCompatActivity {
             startActivity(new Intent(Email_Verification.this, Login.class));
         });
 
-        // Handle Resend Code
+        // Handle Resend Code - FIXED TO MATCH PASSWORD RESET
         resendCode.setOnClickListener(v -> {
             if (System.currentTimeMillis() > resendTimer) {
-                sendOTPEmail();
+                resendVerificationCode();
             } else {
                 Toast.makeText(Email_Verification.this,
                         "Please wait before requesting a new code",
@@ -152,6 +152,41 @@ public class Email_Verification extends AppCompatActivity {
 
                     Toast.makeText(Email_Verification.this,
                             "Verification code sent to " + userData.email,
+                            Toast.LENGTH_LONG).show();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(Email_Verification.this,
+                            "Error: " + e.getMessage(),
+                            Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    // NEW METHOD - COPIED FROM PASSWORD RESET
+    private void resendVerificationCode() {
+        // Generate new OTP
+        verificationCode = String.format("%04d", new Random().nextInt(10000));
+
+        // Store new OTP
+        Map<String, Object> otpData = new HashMap<>();
+        otpData.put("code", verificationCode);
+        otpData.put("timestamp", System.currentTimeMillis());
+        otpData.put("email", userData.email);
+        otpData.put("used", false);
+
+        db.collection("email_verifications").document(userData.email)
+                .set(otpData)
+                .addOnSuccessListener(aVoid -> {
+                    // Send email
+                    sendEmailViaFirebase(userData.email, verificationCode);
+
+                    // Set resend timer
+                    resendTimer = System.currentTimeMillis() + RESEND_TIMEOUT;
+
+                    // Start countdown
+                    startResendCountdown();
+
+                    Toast.makeText(Email_Verification.this,
+                            "New code sent to " + userData.email,
                             Toast.LENGTH_LONG).show();
                 })
                 .addOnFailureListener(e -> {
@@ -496,7 +531,7 @@ public class Email_Verification extends AppCompatActivity {
                             Toast.LENGTH_SHORT).show();
 
                     // Navigate to dashboard
-                    Intent intent = new Intent(Email_Verification.this, dashboard.class);
+                    Intent intent = new Intent(Email_Verification.this, Login.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                     finish();

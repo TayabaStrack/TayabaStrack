@@ -18,6 +18,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.DocumentSnapshot;
 
 public class Login extends AppCompatActivity {
 
@@ -38,6 +39,13 @@ public class Login extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Initialize Firebase first
+        mAuth = FirebaseAuth.getInstance();
+        firestore = FirebaseFirestore.getInstance();
+        sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+
+        // Show login screen
         setContentView(R.layout.activity_login);
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -45,11 +53,6 @@ public class Login extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-
-        // Initialize Firebase
-        mAuth = FirebaseAuth.getInstance();
-        firestore = FirebaseFirestore.getInstance();
-        sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 
         // Initialize views
         emailEditText = findViewById(R.id.email);
@@ -112,94 +115,89 @@ public class Login extends AppCompatActivity {
     }
 
     private void loginUser(String email, String password) {
+        signInButton.setEnabled(false);
+        signInButton.setText("Logging in...");
+
+        Log.d(TAG, "Attempting login");
+
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
+                        Log.d(TAG, "Login successful, checking user status");
+
                         // Save email if "Remember Me" is checked
                         saveEmail(email, rememberMeCheckbox.isChecked());
 
-                        String userId = mAuth.getCurrentUser().getUid();
-
-                        // ✅ Sync Firestore password with Firebase Auth password
-                        updateFirestorePasswordIfNeeded(userId, password);
-
-                        // Continue with normal login flow
-                        checkUserStatus(userId);
+                        // Check user status before proceeding
+                        checkUserStatus();
                     } else {
+                        signInButton.setEnabled(true);
+                        signInButton.setText("Login");
+
+                        Log.e(TAG, "Login failed", task.getException());
                         Toast.makeText(Login.this, "Login Failed: " +
                                 task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
     }
 
-    // ✅ NEW METHOD: Sync Firestore password with Firebase Auth password
-    private void updateFirestorePasswordIfNeeded(String userId, String password) {
+    // ✅ NEW: Check if user status is "active"
+    private void checkUserStatus() {
+        String userId = mAuth.getCurrentUser().getUid();
+
         firestore.collection("users").document(userId)
                 .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        String firestorePassword = documentSnapshot.getString("password");
+                .addOnCompleteListener(task -> {
+                    signInButton.setEnabled(true);
+                    signInButton.setText("Login");
 
-                        // If passwords don't match, update Firestore
-                        if (firestorePassword != null && !firestorePassword.equals(password)) {
-                            Log.d(TAG, "Passwords don't match - updating Firestore password");
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document.exists()) {
+                            String status = document.getString("status");
 
-                            firestore.collection("users").document(userId)
-                                    .update("password", password)
-                                    .addOnSuccessListener(aVoid -> {
-                                        Log.d(TAG, "Firestore password synced with Firebase Auth");
-                                    })
-                                    .addOnFailureListener(e -> {
-                                        Log.e(TAG, "Failed to sync Firestore password", e);
-                                    });
+                            if ("active".equalsIgnoreCase(status)) {
+                                Log.d(TAG, "User status is active, proceeding to dashboard");
+                                goToDashboard();
+                            } else {
+                                Log.w(TAG, "User status is not active: " + status);
+                                // Don't sign out - redirect to verification screen
+                                goToVerification();
+                            }
                         } else {
-                            Log.d(TAG, "Passwords already match - no update needed");
+                            Log.e(TAG, "User document not found");
+                            mAuth.signOut();
+                            Toast.makeText(Login.this,
+                                    "User data not found. Please contact support.",
+                                    Toast.LENGTH_SHORT).show();
                         }
+                    } else {
+                        Log.e(TAG, "Failed to check user status", task.getException());
+                        Toast.makeText(Login.this,
+                                "Failed to verify account status. Please try again.",
+                                Toast.LENGTH_SHORT).show();
                     }
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error getting user document for password sync", e);
-                    // Don't block login if sync fails
                 });
     }
 
-    private void checkUserStatus(String userId) {
-        firestore.collection("users").document(userId)
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        String status = documentSnapshot.getString("status");
-                        String email = documentSnapshot.getString("email");
+    // ✅ NEW: Redirect to verification screen
+    private void goToVerification() {
+        Intent intent = new Intent(Login.this, Verification.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
 
-                        switch (status != null ? status : "") {
-                            case "pending":
-                                Toast.makeText(Login.this,
-                                        "Your account is pending verification. Please check your email.",
-                                        Toast.LENGTH_LONG).show();
+    private void goToDashboard() {
+        try {
+            NotificationHelper.initializeNotifications();
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to initialize notifications", e);
+        }
 
-                                Intent verifyIntent = new Intent(Login.this, Verification.class);
-                                verifyIntent.putExtra("email", email);
-                                startActivity(verifyIntent);
-                                finish();
-                                break;
-
-                            case "approved":
-                            case "active":
-                                Toast.makeText(Login.this, "Login Successful", Toast.LENGTH_SHORT).show();
-                                NotificationHelper.initializeNotifications();
-                                startActivity(new Intent(Login.this, dashboard.class));
-                                finish();
-                                break;
-
-                            default:
-                                Toast.makeText(Login.this, "Account status: " + status, Toast.LENGTH_SHORT).show();
-                                break;
-                        }
-                    } else {
-                        Toast.makeText(Login.this, "User data not found", Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .addOnFailureListener(e -> Toast.makeText(Login.this,
-                        "Error checking user status: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+        Intent intent = new Intent(Login.this, dashboard.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 }
