@@ -62,14 +62,17 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.List;
+import java.util.ArrayList;
 import android.app.ProgressDialog;
 import android.util.Log;
+import android.view.ViewGroup;
+import android.view.LayoutInflater;
 
 public class submitreport extends AppCompatActivity implements OnMapReadyCallback {
 
-    private EditText description, width, height;
+    private EditText description, width, height, depth;
     private Spinner spinnerBarangay, spinnerCategory, spinnerIssue;
-    private ImageView previewImage;
+    private LinearLayout imagesContainer;
     private FrameLayout btnUpload;
     private Button btnSubmit;
     private ImageButton backButton;
@@ -93,14 +96,27 @@ public class submitreport extends AppCompatActivity implements OnMapReadyCallbac
     private StorageReference storageRef;
     private ProgressDialog progressDialog;
 
-    private Uri imageUri = null;
-    private Bitmap capturedImageBitmap = null;
+    private List<ImageItem> imageItems = new ArrayList<>();
     private Location captureLocation = null;
+    private int currentImageIndex = -1; // Track which image slot is being filled
 
     private static final int PICK_IMAGE_REQUEST = 100;
     private static final int CAMERA_REQUEST = 101;
     private static final int CAMERA_PERMISSION_CODE = 200;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 201;
+    private static final int MAX_IMAGES = 2;
+
+    // Inner class to hold image data
+    private static class ImageItem {
+        Uri imageUri;
+        Bitmap capturedImageBitmap;
+        View imageViewContainer;
+        int index;
+
+        ImageItem(int index) {
+            this.index = index;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -173,10 +189,11 @@ public class submitreport extends AppCompatActivity implements OnMapReadyCallbac
         description = findViewById(R.id.description);
         width = findViewById(R.id.width);
         height = findViewById(R.id.height);
+        depth = findViewById(R.id.depth);
         spinnerBarangay = findViewById(R.id.spinnerBarangay);
         spinnerCategory = findViewById(R.id.spinnerCategory);
         spinnerIssue = findViewById(R.id.spinnerIssue);
-        previewImage = findViewById(R.id.previewImage);
+        imagesContainer = findViewById(R.id.imagesContainer);
         btnUpload = findViewById(R.id.btnUpload);
         btnSubmit = findViewById(R.id.btnSubmit);
         backButton = findViewById(R.id.backButton);
@@ -505,6 +522,11 @@ public class submitreport extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void showImagePickerDialog() {
+        if (imageItems.size() >= MAX_IMAGES) {
+            Toast.makeText(this, "Maximum " + MAX_IMAGES + " images allowed", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         String[] options = {"Take Photo", "Choose from Gallery"};
         new android.app.AlertDialog.Builder(this).setTitle("Upload Image")
                 .setItems(options, (dialog, which) -> {
@@ -542,14 +564,15 @@ public class submitreport extends AppCompatActivity implements OnMapReadyCallbac
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == PICK_IMAGE_REQUEST && data != null && data.getData() != null) {
                 try {
-                    imageUri = data.getData();
-                    capturedImageBitmap = null;
-                    getContentResolver().openInputStream(imageUri).close();
-                    previewImage.setImageURI(imageUri);
-                    previewImage.setVisibility(ImageView.VISIBLE);
+                    Uri selectedUri = data.getData();
+                    getContentResolver().openInputStream(selectedUri).close();
+                    
+                    ImageItem item = new ImageItem(imageItems.size());
+                    item.imageUri = selectedUri;
+                    item.capturedImageBitmap = null;
+                    addImageToContainer(item);
                     Toast.makeText(this, "Image selected successfully", Toast.LENGTH_SHORT).show();
                 } catch (Exception e) {
-                    imageUri = null;
                     Toast.makeText(this, "Failed to load selected image.", Toast.LENGTH_SHORT).show();
                 }
             } else if (requestCode == CAMERA_REQUEST && data != null && data.getExtras() != null) {
@@ -557,34 +580,121 @@ public class submitreport extends AppCompatActivity implements OnMapReadyCallbac
                     Object photoData = data.getExtras().get("data");
                     if (photoData instanceof Bitmap) {
                         Bitmap originalBitmap = (Bitmap) photoData;
+                        Bitmap processedBitmap = originalBitmap;
 
                         // ✅ Add geo-tag overlay if location is available
                         if (captureLocation != null) {
                             String userName = "";
                             FirebaseUser currentUser = mAuth.getCurrentUser();
                             if (currentUser != null) {
-                                // Fetch user name from current user
                                 userName = currentUser.getEmail() != null ? currentUser.getEmail().split("@")[0] : "User";
                             }
-
-                            capturedImageBitmap = addGeoTagOverlay(originalBitmap, captureLocation, userName);
+                            processedBitmap = addGeoTagOverlay(originalBitmap, captureLocation, userName);
                             Toast.makeText(this, "Photo captured with geo-tag info", Toast.LENGTH_SHORT).show();
                         } else {
-                            capturedImageBitmap = originalBitmap;
                             Toast.makeText(this, "Photo captured (no location data)", Toast.LENGTH_SHORT).show();
                         }
 
-                        imageUri = null;
-                        if (capturedImageBitmap != null && !capturedImageBitmap.isRecycled()) {
-                            previewImage.setImageBitmap(capturedImageBitmap);
-                            previewImage.setVisibility(ImageView.VISIBLE);
+                        if (processedBitmap != null && !processedBitmap.isRecycled()) {
+                            ImageItem item = new ImageItem(imageItems.size());
+                            item.capturedImageBitmap = processedBitmap;
+                            item.imageUri = null;
+                            addImageToContainer(item);
                         } else throw new Exception("Invalid bitmap");
                     } else throw new Exception("No image data");
                 } catch (Exception e) {
-                    capturedImageBitmap = null;
                     Toast.makeText(this, "Failed to capture photo: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             }
+        }
+        currentImageIndex = -1;
+    }
+
+    private void addImageToContainer(ImageItem item) {
+        // Create image view container
+        FrameLayout imageContainer = new FrameLayout(this);
+        FrameLayout.LayoutParams containerParams = new FrameLayout.LayoutParams(
+                (int) (200 * getResources().getDisplayMetrics().density),
+                (int) (200 * getResources().getDisplayMetrics().density)
+        );
+        containerParams.setMargins(0, 0, (int) (8 * getResources().getDisplayMetrics().density), 0);
+        imageContainer.setLayoutParams(containerParams);
+        imageContainer.setBackgroundResource(R.drawable.image_border_outline);
+
+        // Create ImageView
+        ImageView imageView = new ImageView(this);
+        FrameLayout.LayoutParams imageParams = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+        );
+        imageParams.setMargins((int) (8 * getResources().getDisplayMetrics().density),
+                (int) (8 * getResources().getDisplayMetrics().density),
+                (int) (8 * getResources().getDisplayMetrics().density),
+                (int) (8 * getResources().getDisplayMetrics().density));
+        imageView.setLayoutParams(imageParams);
+        imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+
+        if (item.imageUri != null) {
+            imageView.setImageURI(item.imageUri);
+        } else if (item.capturedImageBitmap != null) {
+            imageView.setImageBitmap(item.capturedImageBitmap);
+        }
+
+        // Create delete button
+        Button deleteButton = new Button(this);
+        FrameLayout.LayoutParams deleteParams = new FrameLayout.LayoutParams(
+                (int) (36 * getResources().getDisplayMetrics().density),
+                (int) (36 * getResources().getDisplayMetrics().density)
+        );
+        deleteParams.gravity = android.view.Gravity.TOP | android.view.Gravity.END;
+        deleteParams.setMargins(0, (int) (4 * getResources().getDisplayMetrics().density),
+                (int) (4 * getResources().getDisplayMetrics().density), 0);
+        deleteButton.setLayoutParams(deleteParams);
+        deleteButton.setText("×");
+        deleteButton.setTextSize(24);
+        deleteButton.setTextColor(android.graphics.Color.WHITE);
+        deleteButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.RED));
+        deleteButton.setPadding(0, 0, 0, 0);
+        deleteButton.setMinWidth(0);
+        deleteButton.setMinHeight(0);
+
+        deleteButton.setOnClickListener(v -> removeImage(item));
+
+        imageContainer.addView(imageView);
+        imageContainer.addView(deleteButton);
+        item.imageViewContainer = imageContainer;
+
+        // Insert before upload button (upload button is at the end)
+        int insertPosition = imageItems.size();
+        imagesContainer.addView(imageContainer, insertPosition);
+        imageItems.add(item);
+
+        // Hide upload button if max images reached
+        if (imageItems.size() >= MAX_IMAGES) {
+            btnUpload.setVisibility(View.GONE);
+        }
+    }
+
+    private void removeImage(ImageItem item) {
+        if (item.imageViewContainer != null) {
+            imagesContainer.removeView(item.imageViewContainer);
+        }
+        
+        // Recycle bitmap if exists
+        if (item.capturedImageBitmap != null && !item.capturedImageBitmap.isRecycled()) {
+            item.capturedImageBitmap.recycle();
+        }
+        
+        imageItems.remove(item);
+        
+        // Update indices for remaining items
+        for (int i = 0; i < imageItems.size(); i++) {
+            imageItems.get(i).index = i;
+        }
+        
+        // Show upload button if less than max images
+        if (imageItems.size() < MAX_IMAGES) {
+            btnUpload.setVisibility(View.VISIBLE);
         }
     }
 
@@ -613,11 +723,13 @@ public class submitreport extends AppCompatActivity implements OnMapReadyCallbac
         String desc = description.getText().toString().trim();
         String w = width.getText().toString().trim();
         String h = height.getText().toString().trim();
+        String d = depth.getText().toString().trim();
         boolean isValid = true;
 
         description.setError(null);
         width.setError(null);
         height.setError(null);
+        depth.setError(null);
 
         // Description is now OPTIONAL - no validation needed
 
@@ -671,8 +783,21 @@ public class submitreport extends AppCompatActivity implements OnMapReadyCallbac
             isValid = false;
         }
 
-        if (imageUri == null && capturedImageBitmap == null) {
-            Toast.makeText(this, "Upload an image", Toast.LENGTH_SHORT).show();
+        // Validate depth if provided (optional)
+        if (!d.isEmpty()) {
+            try {
+                if (Double.parseDouble(d) <= 0) {
+                    depth.setError("Must be > 0");
+                    if (isValid) { depth.requestFocus(); isValid = false; }
+                }
+            } catch (NumberFormatException e) {
+                depth.setError("Invalid number");
+                if (isValid) { depth.requestFocus(); isValid = false; }
+            }
+        }
+
+        if (imageItems.isEmpty()) {
+            Toast.makeText(this, "Upload at least 1 image", Toast.LENGTH_SHORT).show();
             isValid = false;
         }
 
@@ -686,16 +811,16 @@ public class submitreport extends AppCompatActivity implements OnMapReadyCallbac
             Toast.makeText(this, "Authenticating...", Toast.LENGTH_SHORT).show();
             signInAnonymously();
             new android.os.Handler().postDelayed(() -> {
-                if (mAuth.getCurrentUser() != null) submitToFirestore(desc, w, h);
+                if (mAuth.getCurrentUser() != null) submitToFirestore(desc, w, h, d);
                 else Toast.makeText(this, "Authentication failed", Toast.LENGTH_SHORT).show();
             }, 2000);
             return;
         }
 
-        submitToFirestore(desc, w, h);
+        submitToFirestore(desc, w, h, d);
     }
 
-    private void submitToFirestore(String desc, String widthStr, String heightStr) {
+    private void submitToFirestore(String desc, String widthStr, String heightStr, String depthStr) {
         progressDialog.setMessage("Uploading image...");
         progressDialog.show();
 
@@ -706,38 +831,60 @@ public class submitreport extends AppCompatActivity implements OnMapReadyCallbac
             return;
         }
 
-        uploadImageToStorage(UUID.randomUUID().toString(), currentUser.getUid(), desc, widthStr, heightStr);
+        uploadImagesToStorage(UUID.randomUUID().toString(), currentUser.getUid(), desc, widthStr, heightStr, depthStr);
     }
 
-    private void uploadImageToStorage(String reportId, String userId, String desc,
-                                      String widthStr, String heightStr) {
-        StorageReference imageRef = storageRef.child("report_images/" + userId + "/" + reportId + "/incident_image.jpg");
-        byte[] imageBytes = imageUri != null ? uriToByteArray(imageUri) : bitmapToByteArray(capturedImageBitmap);
+    private void uploadImagesToStorage(String reportId, String userId, String desc,
+                                      String widthStr, String heightStr, String depthStr) {
+        List<byte[]> imageBytesList = new ArrayList<>();
+        for (ImageItem item : imageItems) {
+            byte[] bytes = item.imageUri != null ? uriToByteArray(item.imageUri) : bitmapToByteArray(item.capturedImageBitmap);
+            if (bytes != null) {
+                imageBytesList.add(bytes);
+            }
+        }
 
-        if (imageBytes == null) {
+        if (imageBytesList.isEmpty()) {
             progressDialog.dismiss();
-            Toast.makeText(this, "Failed to process image", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Failed to process images", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        imageRef.putBytes(imageBytes)
-                .addOnSuccessListener(taskSnapshot -> imageRef.getDownloadUrl()
-                        .addOnSuccessListener(uri -> {
-                            progressDialog.setMessage("Saving report...");
-                            saveReportData(reportId, userId, desc, widthStr, heightStr, uri.toString());
-                        })
-                        .addOnFailureListener(e -> {
-                            progressDialog.dismiss();
-                            Toast.makeText(this, "Failed to get image URL: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                        }))
-                .addOnFailureListener(e -> {
-                    progressDialog.dismiss();
-                    Toast.makeText(this, "Failed to upload image: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                });
+        // Upload all images
+        List<String> imageUrls = new ArrayList<>();
+        int totalImages = imageBytesList.size();
+        final int[] uploadedCount = {0};
+
+        for (int i = 0; i < imageBytesList.size(); i++) {
+            final int imageIndex = i; // Create final copy for lambda
+            String imageName = "incident_image_" + (imageIndex + 1) + ".jpg";
+            StorageReference imageRef = storageRef.child("report_images/" + userId + "/" + reportId + "/" + imageName);
+            byte[] imageBytes = imageBytesList.get(imageIndex);
+
+            imageRef.putBytes(imageBytes)
+                    .addOnSuccessListener(taskSnapshot -> imageRef.getDownloadUrl()
+                            .addOnSuccessListener(uri -> {
+                                imageUrls.add(uri.toString());
+                                uploadedCount[0]++;
+                                
+                                if (uploadedCount[0] == totalImages) {
+                                    progressDialog.setMessage("Saving report...");
+                                    saveReportData(reportId, userId, desc, widthStr, heightStr, depthStr, imageUrls);
+                                }
+                            })
+                            .addOnFailureListener(e -> {
+                                progressDialog.dismiss();
+                                Toast.makeText(this, "Failed to get image URL: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            }))
+                    .addOnFailureListener(e -> {
+                        progressDialog.dismiss();
+                        Toast.makeText(this, "Failed to upload image " + (imageIndex + 1) + ": " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    });
+        }
     }
 
     private void saveReportData(String reportId, String userId, String desc,
-                                String widthStr, String heightStr, String imageUrl) {
+                                String widthStr, String heightStr, String depthStr, List<String> imageUrls) {
         db.collection("users").document(userId).get()
                 .addOnSuccessListener(documentSnapshot -> {
                     String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
@@ -757,13 +904,17 @@ public class submitreport extends AppCompatActivity implements OnMapReadyCallbac
                     reportData.put("description", desc.isEmpty() ? "No description provided" : desc);
                     reportData.put("width", Double.parseDouble(widthStr));
                     reportData.put("height", Double.parseDouble(heightStr));
+                    if (!depthStr.isEmpty()) {
+                        reportData.put("depth", Double.parseDouble(depthStr));
+                    }
                     reportData.put("barangay", spinnerBarangay.getSelectedItem().toString());
                     reportData.put("latitude", location.latitude);
                     reportData.put("longitude", location.longitude);
                     reportData.put("timestamp", timestamp);
                     reportData.put("status", "pending");
                     reportData.put("createdAt", new Date());
-                    reportData.put("imageUrl", imageUrl);
+                    reportData.put("imageUrl", imageUrls.get(0)); // Primary image for backward compatibility
+                    reportData.put("imageUrls", imageUrls); // All images
 
                     saveReportToFirestore(reportData);
                 })
@@ -808,11 +959,20 @@ public class submitreport extends AppCompatActivity implements OnMapReadyCallbac
         description.setText("");
         width.setText("");
         height.setText("");
+        depth.setText("");
         searchLocation.setText("");
-        imageUri = null;
-        capturedImageBitmap = null;
+        
+        // Clear all images
+        for (ImageItem item : imageItems) {
+            if (item.capturedImageBitmap != null && !item.capturedImageBitmap.isRecycled()) {
+                item.capturedImageBitmap.recycle();
+            }
+        }
+        imageItems.clear();
+        imagesContainer.removeAllViews();
+        btnUpload.setVisibility(View.VISIBLE);
+        
         captureLocation = null;
-        previewImage.setVisibility(ImageView.GONE);
         if (selectedLocationMarker != null) {
             selectedLocationMarker.remove();
             selectedLocationMarker = null;

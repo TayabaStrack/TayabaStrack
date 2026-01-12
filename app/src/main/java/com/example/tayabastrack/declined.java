@@ -27,6 +27,8 @@ import com.google.firebase.storage.FirebaseStorage;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 public class declined extends AppCompatActivity {
 
@@ -249,16 +251,44 @@ public class declined extends AppCompatActivity {
         imageContainer.setLayoutParams(imageContainerParams);
         cardContent.addView(imageContainer);
 
+        // FrameLayout to hold image and overlay
+        android.widget.FrameLayout imageFrame = new android.widget.FrameLayout(this);
+        LinearLayout.LayoutParams frameParams = new LinearLayout.LayoutParams(300, 300);
+        imageFrame.setLayoutParams(frameParams);
+
         ImageView reportImage = new ImageView(this);
         reportImage.setScaleType(ImageView.ScaleType.CENTER_CROP);
         reportImage.setBackgroundColor(0xFFC0C0C0);
-        LinearLayout.LayoutParams imageParams = new LinearLayout.LayoutParams(300, 300);
+        android.widget.FrameLayout.LayoutParams imageParams = new android.widget.FrameLayout.LayoutParams(
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT
+        );
         reportImage.setLayoutParams(imageParams);
+        reportImage.setClickable(false);
+        reportImage.setFocusable(false);
+
+        // Get image URLs
+        List<String> imageUrls = new ArrayList<>();
+        if (reportData.containsKey("imageUrls") && reportData.get("imageUrls") != null) {
+            Object urlsObj = reportData.get("imageUrls");
+            if (urlsObj instanceof List) {
+                List<?> urlsList = (List<?>) urlsObj;
+                for (Object url : urlsList) {
+                    if (url != null) {
+                        imageUrls.add(url.toString());
+                    }
+                }
+            }
+        }
+        
+        // Fallback to single imageUrl if imageUrls not available
+        if (imageUrls.isEmpty() && reportData.containsKey("imageUrl") && reportData.get("imageUrl") != null) {
+            imageUrls.add(reportData.get("imageUrl").toString());
+        }
 
         // Load image from Firebase Storage URL
-        if (reportData.containsKey("imageUrl") && reportData.get("imageUrl") != null) {
-            String imageUrl = reportData.get("imageUrl").toString();
-            loadImageFromUrl(imageUrl, reportImage);
+        if (!imageUrls.isEmpty()) {
+            loadImageFromUrl(imageUrls.get(0), reportImage);
         } else {
             // Try to load from old Blob format (for backward compatibility)
             if (reportData.containsKey("incidentImage")) {
@@ -276,7 +306,32 @@ public class declined extends AppCompatActivity {
             }
         }
 
-        imageContainer.addView(reportImage);
+        imageFrame.addView(reportImage);
+
+        // Add "+1 more photo" overlay if there are 2 images
+        if (imageUrls.size() == 2) {
+            TextView morePhotosText = new TextView(this);
+            android.widget.FrameLayout.LayoutParams textParams = new android.widget.FrameLayout.LayoutParams(
+                    android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+                    android.widget.FrameLayout.LayoutParams.WRAP_CONTENT
+            );
+            textParams.gravity = android.view.Gravity.BOTTOM | android.view.Gravity.CENTER_HORIZONTAL;
+            textParams.setMargins(0, 0, 0, 8);
+            morePhotosText.setLayoutParams(textParams);
+            morePhotosText.setText("+1 more photo");
+            morePhotosText.setTextColor(android.graphics.Color.WHITE);
+            morePhotosText.setTextSize(12);
+            morePhotosText.setTypeface(null, android.graphics.Typeface.BOLD);
+            morePhotosText.setBackgroundColor(0x80000000); // Semi-transparent black
+            morePhotosText.setPadding(8, 4, 8, 4);
+            morePhotosText.setGravity(android.view.Gravity.CENTER);
+            morePhotosText.setClickable(false);
+            morePhotosText.setFocusable(false);
+            imageFrame.addView(morePhotosText);
+        }
+
+
+        imageContainer.addView(imageFrame);
 
         return cardView;
     }

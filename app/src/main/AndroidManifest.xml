@@ -44,6 +44,10 @@
             android:windowSoftInputMode="adjustResize|stateHidden"
             android:exported="false" />
         <activity
+            android:name=".ImageViewerActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" />
+        <activity
             android:name=".declined"
             android:exported="false" />
         <activity

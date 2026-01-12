@@ -37,6 +37,9 @@ dependencies {
     implementation(libs.material)
     implementation(libs.activityKtx)
     implementation(libs.constraintlayout)
+    
+    // ViewPager2 for image viewer
+    implementation("androidx.viewpager2:viewpager2:1.0.0")
 
     // Firebase BOM
     implementation(platform(libs.firebaseBom))
